@@ -92,8 +92,9 @@ trait SchemaTrait
         $result = [];
         $path = rtrim($path, '/');
 
-        if (is_file($path.'.json')) {
-            $result['.json'] = $this->load($path.'.json');
+        $fullpath = $path.'.json';
+        if (is_file($fullpath) && !$this->isExcluded($fullpath, $excludes)) {
+            $result['.json'] = $this->load($fullpath);
         }
 
         if (is_dir($path)) {
@@ -109,13 +110,9 @@ trait SchemaTrait
                     }
                 }
 
-                foreach ($excludes as $exclude) {
-                    if (preg_match($exclude, $fullpath)) {
-                        continue 2;
-                    }
+                if (! $this->isExcluded($fullpath, $excludes)) {
+                    $result["/$structure"] = $this->load($fullpath);
                 }
-
-                $result["/$structure"] = $this->load($fullpath);
             }
         }
 
@@ -160,6 +157,22 @@ trait SchemaTrait
         }
 
         return $result;
+    }
+
+    /**
+     * @param string $fullpath
+     * @param array $excludes
+     * @return boolean
+     */
+    private function isExcluded(string $fullpath, array $excludes) : bool
+    {
+        foreach ($excludes as $exclude) {
+            if (preg_match($exclude, $fullpath)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

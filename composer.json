@@ -1,6 +1,6 @@
 {
     "name": "anourvalar/laravel-interpreter",
-    "description": "Laravel's locales translate through the single file",
+    "description": "Laravel's locales translate through the single (flat) file",
     "keywords": ["anourvalar", "laravel", "locale", "trans", "localization", "translate", "export", "import", "i18"],
     "homepage": "https://github.com/AnourValar/laravel-interpreter",
     "license": "MIT",
