@@ -5,7 +5,8 @@
 
     "adapter": "AnourValar\\LaravelInterpreter\\Adapters\\JsonAdapter",
 
-    "excludes": [
+    "include_files": [],
 
-    ]
+    "exclude_files": [],
+    "exclude_phrases": []
 }

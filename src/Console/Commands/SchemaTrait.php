@@ -24,7 +24,9 @@ trait SchemaTrait
             throw new InputException('Incorrect schema structure.');
         }
 
-        if (! isset($schema['source_locale'], $schema['target_locale'], $schema['filename'], $schema['adapter'], $schema['excludes'])) {
+        if (!isset($schema['source_locale'], $schema['target_locale'], $schema['filename'], $schema['adapter']) ||
+            !isset($schema['include_files'], $schema['exclude_files'], $schema['exclude_phrases'])
+        ) {
             throw new InputException('Incorrect schema structure.');
         }
 
@@ -77,23 +79,33 @@ trait SchemaTrait
      * @param array $schema
      * @return array
      */
-    protected function getExcludes(array $schema) : array
+    protected function getFilters(array $schema) : array
     {
-        return $schema['excludes'];
+        return [
+            'include_files' => ($schema['include_files'] ?? []),
+
+            'exclude_files' => ($schema['exclude_files'] ?? []),
+            'exclude_phrases' => ($schema['exclude_phrases'] ?? []),
+        ];
     }
 
     /**
      * @param string $path
-     * @param array $excludes
+     * @param array $filters
+     * @param integer $trimLength
      * @return array
      */
-    protected function getStructure(string $path, array $excludes) : array
+    protected function getStructure(string $path, array $filters, int $trimLength = 0) : array
     {
         $result = [];
         $path = rtrim($path, '/');
 
+        if (! $trimLength) {
+            $trimLength = mb_strlen($path);
+        }
+
         $fullpath = $path.'.json';
-        if (is_file($fullpath) && !$this->isExcluded($fullpath, $excludes)) {
+        if (is_file($fullpath) && $this->isIncluded('../'.basename($fullpath), $filters)) {
             $result['.json'] = $this->load($fullpath);
         }
 
@@ -103,15 +115,12 @@ trait SchemaTrait
                     continue;
                 }
                 $fullpath = "$path/$structure";
+                $relativePath = mb_substr($fullpath, $trimLength);
 
                 if (is_dir($fullpath)) {
-                    foreach ($this->getStructure($fullpath, $excludes) as $key => $item) {
-                        $result["/{$structure}{$key}"] = $item;
-                    }
-                }
-
-                if (! $this->isExcluded($fullpath, $excludes)) {
-                    $result["/$structure"] = $this->load($fullpath);
+                    $result = array_replace($result, $this->getStructure($fullpath, $filters, $trimLength));
+                } else if ($this->isIncluded($relativePath, $filters)) {
+                    $result[$relativePath] = $this->load($fullpath);
                 }
             }
         }
@@ -160,19 +169,21 @@ trait SchemaTrait
     }
 
     /**
-     * @param string $fullpath
-     * @param array $excludes
+     * @param string $path
+     * @param array $filters
      * @return boolean
      */
-    private function isExcluded(string $fullpath, array $excludes) : bool
+    private function isIncluded(string $path, array $filters) : bool
     {
-        foreach ($excludes as $exclude) {
-            if (preg_match($exclude, $fullpath)) {
-                return true;
-            }
+        if ($filters['include_files'] && !in_array($path, $filters['include_files'])) {
+            return false;
         }
 
-        return false;
+        if (in_array($path, $filters['exclude_files'])) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

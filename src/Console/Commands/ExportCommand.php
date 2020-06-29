@@ -47,13 +47,13 @@ class ExportCommand extends Command
             $targetLocale = $this->getTargetLocale($schema);
             $filename = $this->getFileName($schema);
             $adapter = $this->getAdapter($schema);
-            $excludes = $this->getExcludes($schema);
+            $filters = $this->getFilters($schema);
 
             $data = [];
-            $sourceData = $this->getStructure(\App::langPath()."/$sourceLocale/", $excludes);
-            $targetData = $this->getStructure(\App::langPath()."/$targetLocale/", $excludes);
+            $sourceData = $this->getStructure(\App::langPath()."/$sourceLocale/", $filters);
+            $targetData = $this->getStructure(\App::langPath()."/$targetLocale/", $filters);
 
-            foreach ($this->getDiff($sourceData, $targetData) as $item) {
+            foreach ($this->getDiff($sourceData, $targetData, $filters) as $item) {
                 $item = collect($item)->flatten()->toArray();
                 $data = array_replace($data, array_combine($item, $item));
             }
@@ -88,21 +88,26 @@ class ExportCommand extends Command
     /**
      * @param array $array1
      * @param array $array2
+     * @param array $filters
      * @return array
      */
-    protected function getDiff(array $array1, array $array2) : array
+    protected function getDiff(array $array1, array $array2, array $filters) : array
     {
         $result = [];
 
         foreach ($array1 as $key => $value) {
-            if (! isset($array2[$key])) {
-                $result[$key] = $value;
-            } else if (is_array($value)) {
-                $value = $this->getDiff($value, $array2[$key]);
+            if (in_array($value, $filters['exclude_phrases'])) {
+                continue;
+            }
+
+            if (is_array($value)) {
+                $value = $this->getDiff($value, ($array2[$key] ?? []), $filters);
 
                 if ($value) {
                     $result[$key] = $value;
                 }
+            } else if (! isset($array2[$key])) {
+                $result[$key] = $value;
             }
         }
 

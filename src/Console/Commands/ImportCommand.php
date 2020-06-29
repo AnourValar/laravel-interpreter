@@ -52,10 +52,10 @@ class ImportCommand extends Command
             $targetLocale = $this->getTargetLocale($schema);
             $filename = $this->getFileName($schema);
             $adapter = $this->getAdapter($schema);
-            $excludes = $this->getExcludes($schema);
+            $filters = $this->getFilters($schema);
 
-            $sourceData = $this->getStructure(\App::langPath()."/$sourceLocale/", $excludes);
-            $targetData = $this->getStructure(\App::langPath()."/$targetLocale/", $excludes);
+            $sourceData = $this->getStructure(\App::langPath()."/$sourceLocale/", $filters);
+            $targetData = $this->getStructure(\App::langPath()."/$targetLocale/", $filters);
 
             $translate = $adapter->import(file_get_contents($filename));
 
