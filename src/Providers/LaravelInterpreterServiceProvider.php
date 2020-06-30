@@ -19,6 +19,7 @@ class LaravelInterpreterServiceProvider extends ServiceProvider
                 \AnourValar\LaravelInterpreter\Console\Commands\SchemaCommand::class,
                 \AnourValar\LaravelInterpreter\Console\Commands\ExportCommand::class,
                 \AnourValar\LaravelInterpreter\Console\Commands\ImportCommand::class,
+                \AnourValar\LaravelInterpreter\Console\Commands\WalkCommand::class,
             ]);
         }
     }

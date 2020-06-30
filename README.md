@@ -9,6 +9,12 @@ composer require anourvalar/laravel-interpreter --dev
 
 ## Usage
 
+Optional step: Bypass all templates (views) and save translations
+
+```bash
+php artisan interpreter:walk
+```
+
 First step: Create translate schema (config) for target locale
 
 ```bash
