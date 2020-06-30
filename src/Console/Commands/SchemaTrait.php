@@ -82,6 +82,7 @@ trait SchemaTrait
     protected function getFilters(array $schema) : array
     {
         return [
+            'include_json' => ($schema['include_json'] ?? false),
             'include_files' => ($schema['include_files'] ?? []),
 
             'exclude_files' => ($schema['exclude_files'] ?? []),
@@ -105,7 +106,7 @@ trait SchemaTrait
         }
 
         $fullpath = $path.'.json';
-        if (is_file($fullpath) && $this->isIncluded('../'.basename($fullpath), $filters)) {
+        if (is_file($fullpath) && $filters['include_json']) {
             $result['.json'] = $this->load($fullpath);
         }
 
@@ -197,7 +198,15 @@ trait SchemaTrait
         }
 
         if (preg_match('#\.json$#', $fullpath)) {
-            return json_decode(file_get_contents($fullpath), true);
+            $data = json_decode(file_get_contents($fullpath), true);
+
+            foreach ((array)$data as $key => $item) {
+                if (! isset($item)) {
+                    $data[$key] = $key;
+                }
+            }
+
+            return $data;
         }
 
         return null;
