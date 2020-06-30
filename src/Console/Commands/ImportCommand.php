@@ -66,6 +66,7 @@ class ImportCommand extends Command
                 }
 
                 $data = $this->replace($data, $translate);
+                $data = $this->clean($data);
                 $data = array_replace_recursive($data, $targetData[$path]);
 
                 if ($data) {
@@ -134,6 +135,27 @@ class ImportCommand extends Command
         }
 
         return $source;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    protected function clean(array $data) : array
+    {
+        foreach ($data as $key => $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $data[$key] = $this->clean($data[$key]);
+
+            if (! count($data[$key])) {
+                unset($data[$key]);
+            }
+        }
+
+        return $data;
     }
 
     /**
