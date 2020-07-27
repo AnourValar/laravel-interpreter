@@ -10,7 +10,7 @@ interface AdapterInterface
      * @param array $data
      * @return string
      */
-    public function export(array $data) : string;
+    public function export(array $data): string;
 
     /**
      * Extract data (unserialize) from filled file
@@ -18,5 +18,5 @@ interface AdapterInterface
      * @param string $data
      * @return array
      */
-    public function import(string $data) : array;
+    public function import(string $data): array;
 }

@@ -48,7 +48,7 @@ class SchemaCommand extends Command
 
             $this->error('Schema already exists. File: "'.$path.'".');
 
-        } else if (! file_put_contents($path, $schema)) {
+        } elseif (! file_put_contents($path, $schema)) {
 
             $this->error('Cannot save schema to file "'.$path.'".');
 

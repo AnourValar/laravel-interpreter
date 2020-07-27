@@ -13,7 +13,7 @@ class CsvAdapter implements AdapterInterface
      * {@inheritDoc}
      * @see \AnourValar\LaravelInterpreter\Adapters\AdapterInterface::export()
      */
-    public function export(array $data) : string
+    public function export(array $data): string
     {
         ob_start();
         $resource = fopen('php://output', 'w');
@@ -31,7 +31,7 @@ class CsvAdapter implements AdapterInterface
      * {@inheritDoc}
      * @see \AnourValar\LaravelInterpreter\Adapters\AdapterInterface::import()
      */
-    public function import(string $data) : array
+    public function import(string $data): array
     {
         $result = [];
 

@@ -65,7 +65,7 @@ class WalkCommand extends Command
      * @param mixed $paths
      * @return array
      */
-    protected function getViews($paths) : array
+    protected function getViews($paths): array
     {
         $result = [];
 
@@ -79,7 +79,7 @@ class WalkCommand extends Command
 
                 if (is_dir($item)) {
                     $result = array_merge($result, $this->getViews($item));
-                } else if (stripos($item, '.php')) {
+                } elseif (stripos($item, '.php')) {
                     $result[] = file_get_contents($item);
                 }
             }
@@ -92,18 +92,18 @@ class WalkCommand extends Command
      * @param string $view
      * @return array
      */
-    protected function getPhrases(string $view) : array
+    protected function getPhrases(string $view): array
     {
         $view = preg_replace('#\{\{\-\-.*\-\-\}\}#sU', '<>', $view);
 
         $result = [];
 
-        preg_match_all('|\@lang\(([\'\"])(.*?)(?<!\\\)\1|s', $view, $patterns);
+        preg_match_all('|\@lang\(\s*([\'\"])(.*?)(?<!\\\)\1|s', $view, $patterns);
         if (isset($patterns[2])) {
             $result = array_merge($result, $patterns[2]);
         }
 
-        preg_match_all('|\_\_\(([\'\"])(.*?)(?<!\\\)\1|s', $view, $patterns);
+        preg_match_all('|\_\_\(\s*([\'\"])(.*?)(?<!\\\)\1|s', $view, $patterns);
         if (isset($patterns[2])) {
             $result = array_merge($result, $patterns[2]);
         }
@@ -115,7 +115,7 @@ class WalkCommand extends Command
      * @param array $result
      * @return array
      */
-    protected function clean(array $phrases) : array
+    protected function clean(array $phrases): array
     {
         $phrases = array_unique($phrases);
         $phrases = array_filter($phrases);
@@ -128,7 +128,7 @@ class WalkCommand extends Command
      * @param string $path
      * @return bool
      */
-    protected function save(array $phrases, string $path) : bool
+    protected function save(array $phrases, string $path): bool
     {
         $phrases = array_fill_keys($phrases, null);
 

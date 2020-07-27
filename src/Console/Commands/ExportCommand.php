@@ -60,7 +60,7 @@ class ExportCommand extends Command
 
             if (! count($data)) {
                 $this->warn('Nothing to export.');
-            } else if (file_put_contents($filename, $adapter->export($data))) {
+            } elseif (file_put_contents($filename, $adapter->export($data))) {
                 $this->info('Translate successfully created. File: "'.$filename.'".');
             } else {
                 $this->error('Cannot save create file "'.$filename.'".');
@@ -74,7 +74,7 @@ class ExportCommand extends Command
      * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
      * @return string
      */
-    protected function getFilename(array $schema) : string
+    protected function getFilename(array $schema): string
     {
         $filename = \App::langPath() . '/' . $schema['filename'];
 
@@ -91,7 +91,7 @@ class ExportCommand extends Command
      * @param array $filters
      * @return array
      */
-    protected function getDiff(array $array1, array $array2, array $filters) : array
+    protected function getDiff(array $array1, array $array2, array $filters): array
     {
         $result = [];
 
@@ -106,7 +106,7 @@ class ExportCommand extends Command
                 if ($value) {
                     $result[$key] = $value;
                 }
-            } else if (! isset($array2[$key])) {
+            } elseif (! isset($array2[$key])) {
                 $result[$key] = $value;
             }
         }

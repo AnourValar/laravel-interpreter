@@ -93,7 +93,7 @@ class ImportCommand extends Command
      * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
      * @return string
      */
-    protected function getFilename(array $schema) : string
+    protected function getFilename(array $schema): string
     {
         $filename = \App::langPath() . '/' . $schema['filename'];
 
@@ -109,7 +109,7 @@ class ImportCommand extends Command
      * @param array $data
      * @return array
      */
-    protected function replace(array $source, array $data) : array
+    protected function replace(array $source, array $data): array
     {
         foreach ($source as $key => $value) {
             if (is_scalar($value)) {
@@ -141,7 +141,7 @@ class ImportCommand extends Command
      * @param array $data
      * @return array
      */
-    protected function clean(array $data) : array
+    protected function clean(array $data): array
     {
         foreach ($data as $key => $item) {
             if (! is_array($item)) {
@@ -163,7 +163,7 @@ class ImportCommand extends Command
      * @param array $data
      * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
      */
-    protected function save(string $path, array $data) : void
+    protected function save(string $path, array $data): void
     {
         if (preg_match('#\.php$#i', $path)) {
             $array = $this->exportArray($data, 4);
@@ -188,7 +188,7 @@ class ImportCommand extends Command
      * @param array $reference
      * @return array
      */
-    protected function sort(array $data, array $reference) : array
+    protected function sort(array $data, array $reference): array
     {
         uksort(
             $data,

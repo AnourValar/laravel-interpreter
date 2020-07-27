@@ -11,7 +11,7 @@ trait SchemaTrait
      * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
      * @return array
      */
-    protected function getSchema(?string $schema) : array
+    protected function getSchema(?string $schema): array
     {
         $path = \App::langPath() .'/' . $schema . '_schema.json';
 
@@ -38,7 +38,7 @@ trait SchemaTrait
      * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
      * @return string
      */
-    protected function getSourceLocale(array $schema) : string
+    protected function getSourceLocale(array $schema): string
     {
         return $schema['source_locale'];
     }
@@ -48,7 +48,7 @@ trait SchemaTrait
      * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
      * @return string
      */
-    protected function getTargetLocale(array $schema) : string
+    protected function getTargetLocale(array $schema): string
     {
         $targetLocale = $schema['target_locale'];
 
@@ -64,7 +64,7 @@ trait SchemaTrait
      * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
      * @return \AnourValar\LaravelInterpreter\Adapters\AdapterInterface
      */
-    protected function getAdapter(array $schema) : \AnourValar\LaravelInterpreter\Adapters\AdapterInterface
+    protected function getAdapter(array $schema): \AnourValar\LaravelInterpreter\Adapters\AdapterInterface
     {
         $adapter = \App::make($schema['adapter']);
 
@@ -79,7 +79,7 @@ trait SchemaTrait
      * @param array $schema
      * @return array
      */
-    protected function getFilters(array $schema) : array
+    protected function getFilters(array $schema): array
     {
         return [
             'include_json' => ($schema['include_json'] ?? false),
@@ -96,7 +96,7 @@ trait SchemaTrait
      * @param integer $trimLength
      * @return array
      */
-    protected function getStructure(string $path, array $filters, int $trimLength = 0) : array
+    protected function getStructure(string $path, array $filters, int $trimLength = 0): array
     {
         $result = [];
         $path = rtrim($path, '/');
@@ -120,7 +120,7 @@ trait SchemaTrait
 
                 if (is_dir($fullpath)) {
                     $result = array_replace($result, $this->getStructure($fullpath, $filters, $trimLength));
-                } else if ($this->isIncluded($relativePath, $filters)) {
+                } elseif ($this->isIncluded($relativePath, $filters)) {
                     $result[$relativePath] = $this->load($fullpath);
                 }
             }
@@ -134,7 +134,7 @@ trait SchemaTrait
      * @param integer $indentSize
      * @return string
      */
-    protected function exportArray(array $array, int $indentSize) : string
+    protected function exportArray(array $array, int $indentSize): string
     {
         $result = '';
 
@@ -158,7 +158,7 @@ trait SchemaTrait
             } else {
                 if (is_null($value)) {
                     $value = 'null';
-                } else if (is_string($value)) {
+                } elseif (is_string($value)) {
                     $value = "'".addCslashes($value, "'")."'";
                 }
 
@@ -174,7 +174,7 @@ trait SchemaTrait
      * @param array $filters
      * @return boolean
      */
-    private function isIncluded(string $path, array $filters) : bool
+    private function isIncluded(string $path, array $filters): bool
     {
         if ($filters['include_files'] && !in_array($path, $filters['include_files'])) {
             return false;
@@ -191,7 +191,7 @@ trait SchemaTrait
      * @param string $fullpath
      * @return array|NULL
      */
-    private function load(string $fullpath) : ?array
+    private function load(string $fullpath): ?array
     {
         if (preg_match('#\.php$#', $fullpath)) {
             return require $fullpath;
