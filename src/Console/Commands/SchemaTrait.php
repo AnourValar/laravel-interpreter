@@ -105,9 +105,10 @@ trait SchemaTrait
             $trimLength = mb_strlen($path);
         }
 
-        $fullpath = $path.'.json';
-        if (is_file($fullpath) && $filters['include_json']) {
-            $result['.json'] = $this->load($fullpath);
+        foreach ([$path.'.json', $path.'_walk.json'] as $item) {
+            if (is_file($item) && $filters['include_json']) {
+                $result['.json'] = array_replace(($result['.json'] ?? []), $this->load($item));
+            }
         }
 
         if (is_dir($path)) {

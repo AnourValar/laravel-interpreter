@@ -53,7 +53,7 @@ class WalkCommand extends Command
             return;
         }
 
-        $path = \App::langPath()."/$sourceLocale.json";
+        $path = \App::langPath()."/{$sourceLocale}_walk.json";
         if ($this->save($phrases, $path)) {
             $this->info('Translate successfully updated. File: "'.$path.'".');
         } else {
@@ -131,10 +131,6 @@ class WalkCommand extends Command
     protected function save(array $phrases, string $path): bool
     {
         $phrases = array_fill_keys($phrases, null);
-
-        if (is_file($path)) {
-            $phrases = array_replace($phrases, json_decode(file_get_contents($path), true));
-        }
 
         uksort($phrases, function ($a, $b)
         {
