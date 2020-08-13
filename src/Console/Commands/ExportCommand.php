@@ -14,7 +14,7 @@ class ExportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'interpreter:export {schema}';
+    protected $signature = 'interpreter:export {schema} {--slug}';
 
     /**
      * The console command description.
@@ -56,6 +56,10 @@ class ExportCommand extends Command
             foreach ($this->getDiff($sourceData, $targetData, $filters) as $item) {
                 $item = collect($item)->flatten()->toArray();
                 $data = array_replace($data, array_combine($item, $item));
+            }
+
+            if ($this->option('slug')) {
+                $data = $this->slug($data);
             }
 
             if (! count($data)) {
@@ -112,5 +116,21 @@ class ExportCommand extends Command
         }
 
         return $result;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    protected function slug(array $data): array
+    {
+        $slugHelper = \App::make(\AnourValar\LaravelInterpreter\Helpers\SlugHelper::class);
+
+        foreach ($data as &$value) {
+            $value = $slugHelper->translit($value);
+        }
+        unset($value);
+
+        return $data;
     }
 }
