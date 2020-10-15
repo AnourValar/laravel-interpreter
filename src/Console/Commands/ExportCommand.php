@@ -24,6 +24,16 @@ class ExportCommand extends Command
     protected $description = 'Create translate file';
 
     /**
+     * List of sources
+     *
+     * @var array
+     */
+    protected $sources = [
+        \AnourValar\LaravelInterpreter\Sources\LangSource::class,
+        \AnourValar\LaravelInterpreter\Sources\ViewsSource::class,
+    ];
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -42,21 +52,23 @@ class ExportCommand extends Command
     {
         try {
             $schema = $this->getSchema($this->argument('schema'));
-
-            $sourceLocale = $this->getSourceLocale($schema);
-            $targetLocale = $this->getTargetLocale($schema);
             $filename = $this->getFileName($schema);
-            $adapter = $this->getAdapter($schema);
-            $filters = $this->getFilters($schema);
 
             $data = [];
-            $sourceData = $this->getStructure(\App::langPath()."/$sourceLocale/", $filters);
-            $targetData = $this->getStructure(\App::langPath()."/$targetLocale/", $filters);
 
-            foreach ($this->getDiff($sourceData, $targetData, $filters) as $item) {
-                $item = collect($item)->flatten()->toArray();
-                $data = array_replace($data, array_combine($item, $item));
+            foreach ($this->sources as $source) {
+                $source = \App::make($source);
+                if (! $source instanceof \AnourValar\LaravelInterpreter\Sources\SourceInterface) {
+                    throw new \LogicException('Source must implements SourceInterface.');
+                }
+
+                $curr = $source->extract($schema);
+                $data = array_replace($data, array_combine($curr, $curr));
             }
+
+            $data = $this->excludePhrases($data, $schema);
+
+            $this->sort($data);
 
             if ($this->option('slug')) {
                 $data = $this->slug($data);
@@ -64,7 +76,7 @@ class ExportCommand extends Command
 
             if (! count($data)) {
                 $this->warn('Nothing to export.');
-            } elseif (file_put_contents($filename, $adapter->export($data))) {
+            } elseif (file_put_contents($filename, $this->getAdapter($schema)->export($data))) {
                 $this->info('Translate successfully created. File: "'.$filename.'".');
             } else {
                 $this->error('Cannot save create file "'.$filename.'".');
@@ -90,32 +102,39 @@ class ExportCommand extends Command
     }
 
     /**
-     * @param array $array1
-     * @param array $array2
-     * @param array $filters
+     * @param array $data
+     * @param array $schema
      * @return array
      */
-    protected function getDiff(array $array1, array $array2, array $filters): array
+    protected function excludePhrases(array $data, array $schema): array
     {
-        $result = [];
-
-        foreach ($array1 as $key => $value) {
-            if (in_array($value, $filters['exclude_phrases'])) {
-                continue;
-            }
-
-            if (is_array($value)) {
-                $value = $this->getDiff($value, ($array2[$key] ?? []), $filters);
-
-                if ($value) {
-                    $result[$key] = $value;
-                }
-            } elseif (! isset($array2[$key])) {
-                $result[$key] = $value;
+        foreach ($data as $item) {
+            if (in_array($item, $schema['exclude_phrases'])) {
+                unset($data[$item]);
             }
         }
 
-        return $result;
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    protected function sort(array &$data): void
+    {
+        uksort($data, function ($a, $b)
+        {
+            if (mb_strlen($a) < mb_strlen($b)) {
+                return 1;
+            }
+
+            if (mb_strlen($a) > mb_strlen($b)) {
+                return -1;
+            }
+
+            return ($a < $b) ? 1 : -1;
+        });
     }
 
     /**

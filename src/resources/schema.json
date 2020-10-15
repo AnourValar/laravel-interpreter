@@ -1,13 +1,25 @@
 {
     "source_locale": "%DEFAULT_LOCALE%",
     "target_locale": "%LOCALE%",
-    "filename": "%LOCALE%_i18.json",
 
     "adapter": "AnourValar\\LaravelInterpreter\\Adapters\\JsonAdapter",
+    "filename": "%LOCALE%_i18.json",
 
     "include_json": true,
-    "include_files": [],
 
-    "exclude_files": [],
+    "lang_files": {
+        "include": [],
+
+        "exclude": [],
+
+        "exclude_keys": []
+    },
+
+    "view_files": {
+        "include": [],
+
+        "exclude": []
+    },
+
     "exclude_phrases": []
 }

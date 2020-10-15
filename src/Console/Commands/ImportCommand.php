@@ -10,16 +10,11 @@ class ImportCommand extends Command
     use SchemaTrait;
 
     /**
-     * @var integer
-     */
-    protected const CHMOD = 0755;
-
-    /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'interpreter:import {schema}';
+    protected $signature = 'interpreter:import {schema} {chmod=0755}';
 
     /**
      * The console command description.
@@ -41,23 +36,25 @@ class ImportCommand extends Command
     /**
      * Execute the console command.
      *
+     * @param \AnourValar\LaravelInterpreter\Helpers\FilesystemHelper $filesystemHelper
      * @return void
      */
-    public function handle()
+    public function handle(\AnourValar\LaravelInterpreter\Helpers\FilesystemHelper $filesystemHelper)
     {
         try {
             $schema = $this->getSchema($this->argument('schema'));
-
-            $sourceLocale = $this->getSourceLocale($schema);
-            $targetLocale = $this->getTargetLocale($schema);
             $filename = $this->getFileName($schema);
-            $adapter = $this->getAdapter($schema);
-            $filters = $this->getFilters($schema);
 
-            $sourceData = $this->getStructure(\App::langPath()."/$sourceLocale/", $filters);
-            $targetData = $this->getStructure(\App::langPath()."/$targetLocale/", $filters);
+            $sourceData = $filesystemHelper->getStructure(\App::langPath()."/{$schema['source_locale']}/", $schema);
+            $targetData = $filesystemHelper->getStructure(\App::langPath()."/{$schema['target_locale']}/", $schema);
 
-            $translate = $adapter->import(file_get_contents($filename));
+            $viewsData = \App::make(\AnourValar\LaravelInterpreter\Sources\ViewsSource::class)->extract($schema);
+            $sourceData['.json'] = array_replace(
+                ($sourceData['.json'] ?? []),
+                array_combine($viewsData, $viewsData)
+            );
+
+            $translate = $this->getAdapter($schema)->import(file_get_contents($filename));
 
             $imported = false;
             foreach ($sourceData as $path => $data) {
@@ -65,7 +62,7 @@ class ImportCommand extends Command
                     $targetData[$path] = [];
                 }
 
-                $data = $this->replace($data, $translate);
+                $data = $this->replace($data, $translate, $schema['lang_files']['exclude_keys']);
                 $data = $this->clean($data);
                 $data = array_replace_recursive($data, $targetData[$path]);
 
@@ -73,7 +70,7 @@ class ImportCommand extends Command
                     $data = $this->sort($data, $sourceData[$path]);
 
                     if ($data != $targetData[$path]) {
-                        $this->save(\App::langPath()."/{$targetLocale}{$path}", $data);
+                        $this->save(\App::langPath()."/{$schema['target_locale']}{$path}", $data, $this->argument('chmod'));
                         $imported = true;
                     }
                 }
@@ -107,11 +104,17 @@ class ImportCommand extends Command
     /**
      * @param array $source
      * @param array $data
+     * @param array $excludeKeys
      * @return array
      */
-    protected function replace(array $source, array $data): array
+    protected function replace(array $source, array $data, array $excludeKeys): array
     {
         foreach ($source as $key => $value) {
+            if (in_array($key, $excludeKeys)) {
+                unset($source[$key]);
+                continue;
+            }
+
             if (is_scalar($value)) {
                 foreach ($data as $original => $translate) {
                     if ($value == $original) {
@@ -130,7 +133,7 @@ class ImportCommand extends Command
 
                 unset($source[$key]);
             } else {
-                $source[$key] = $this->replace($value, $data);
+                $source[$key] = $this->replace($value, $data, $excludeKeys);
             }
         }
 
@@ -161,9 +164,10 @@ class ImportCommand extends Command
     /**
      * @param string $path
      * @param array $data
+     * @param string $chmod
      * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
      */
-    protected function save(string $path, array $data): void
+    protected function save(string $path, array $data, string $chmod): void
     {
         if (preg_match('#\.php$#i', $path)) {
             $array = $this->exportArray($data, 4);
@@ -175,7 +179,7 @@ class ImportCommand extends Command
         }
 
         if (! is_dir(dirname($path))) {
-            mkdir(dirname($path), static::CHMOD, true);
+            mkdir(dirname($path), $chmod, true);
         }
 
         if (! file_put_contents($path, $data)) {
@@ -215,5 +219,45 @@ class ImportCommand extends Command
         }
 
         return $data;
+    }
+
+    /**
+     * @param array $array
+     * @param integer $indentSize
+     * @return string
+     */
+    protected function exportArray(array $array, int $indentSize): string
+    {
+        $result = '';
+
+        foreach ($array as $key => $value) {
+            if ($result) {
+                $result .= "\n";
+            }
+
+            $key = "'".addCslashes($key, "'")."'";
+
+            if (is_array($value)) {
+                $result .= str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "$key => [";
+
+                $sub = $this->exportArray($value, $indentSize + 4);
+
+                if ($sub) {
+                    $result .= "\n" . $sub . "\n" . str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "],";
+                } else {
+                    $result .= "],";
+                }
+            } else {
+                if (is_null($value)) {
+                    $value = 'null';
+                } elseif (is_string($value)) {
+                    $value = "'".addCslashes($value, "'")."'";
+                }
+
+                $result .= str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "$key => $value,";
+            }
+        }
+
+        return $result;
     }
 }
