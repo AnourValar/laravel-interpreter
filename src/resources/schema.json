@@ -8,17 +8,17 @@
     "include_json": true,
 
     "lang_files": {
-        "include": [],
-
         "exclude": [],
+
+        "include": [],
 
         "exclude_keys": []
     },
 
     "view_files": {
-        "include": [],
+        "exclude": [],
 
-        "exclude": []
+        "include": []
     },
 
     "exclude_phrases": []
