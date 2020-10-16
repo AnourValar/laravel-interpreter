@@ -1,30 +1,14 @@
 <?php
 
-namespace AnourValar\LaravelInterpreter\Sources;
+namespace AnourValar\LaravelInterpreter\Services;
 
-class ViewsSource implements SourceInterface
+trait WalkTrait
 {
     /**
-     * @var \AnourValar\LaravelInterpreter\Helpers\FilesystemHelper
+     * @param array $schema
+     * @return array
      */
-    protected $filesystemHelper;
-
-    /**
-     * DI
-     *
-     * @param \AnourValar\LaravelInterpreter\Helpers\FilesystemHelper $filesystemHelper
-     * @return void
-     */
-    public function __construct(\AnourValar\LaravelInterpreter\Helpers\FilesystemHelper $filesystemHelper)
-    {
-        $this->filesystemHelper = $filesystemHelper;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see \AnourValar\LaravelInterpreter\Sources\SourceInterface::get()
-     */
-    public function extract(array $schema): array
+    protected function walk(array $schema): array
     {
         $phrases = [];
 
@@ -33,9 +17,8 @@ class ViewsSource implements SourceInterface
         }
 
         $phrases = array_filter(array_unique($phrases));
-        return $this->getDiff($phrases, $schema);
+        return array_combine($phrases, $phrases);
     }
-
 
     /**
      * @param array $paths
@@ -56,7 +39,7 @@ class ViewsSource implements SourceInterface
 
                 if (is_dir($item)) {
                     $result = array_merge($result, $this->getViews((array)$item, $schema));
-                } elseif (stripos($item, '.php') && $this->filesystemHelper->passes($item, $schema['view_files'])) {
+                } elseif (stripos($item, '.php') && $this->passes($item, $schema['view_files'])) {
                     $result[] = file_get_contents($item);
                 }
             }
@@ -89,22 +72,26 @@ class ViewsSource implements SourceInterface
     }
 
     /**
-     * @param array $phrases
-     * @param array $schema
-     * @return array
+     * Passes filters rules
+     *
+     * @param string $path
+     * @param array $rules
+     * @return boolean
      */
-    protected function getDiff(array $phrases, array $schema): array
+    protected function passes(string $path, array $rules): bool
     {
-        $targetData = $this->filesystemHelper->getStructure(\App::langPath()."/{$schema['target_locale']}/", $schema, true);
-
-        if (isset($targetData['.json'])) {
-            foreach ($phrases as $key => $value) {
-                if (array_key_exists($value, $targetData['.json'])) {
-                    unset($phrases[$key]);
-                }
+        foreach ($rules['exclude'] as $item) {
+            if (stripos($path, $item) !== false) {
+                return false;
             }
         }
 
-        return $phrases;
+        foreach ($rules['include'] as $item) {
+            if (stripos($path, $item) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

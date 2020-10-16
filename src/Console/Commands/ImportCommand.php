@@ -14,7 +14,7 @@ class ImportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'interpreter:import {schema} {chmod=0755}';
+    protected $signature = 'interpreter:import {schema} {--re-translate} {chmod=0755}';
 
     /**
      * The console command description.
@@ -36,26 +36,33 @@ class ImportCommand extends Command
     /**
      * Execute the console command.
      *
-     * @param \AnourValar\LaravelInterpreter\Helpers\FilesystemHelper $filesystemHelper
+     * @param \AnourValar\LaravelInterpreter\Services\ExportService $exportService
      * @return void
      */
-    public function handle(\AnourValar\LaravelInterpreter\Helpers\FilesystemHelper $filesystemHelper)
+    public function handle(\AnourValar\LaravelInterpreter\Services\ExportService $exportService)
     {
         try {
+            // Input data
             $schema = $this->getSchema($this->argument('schema'));
-            $filename = $this->getFileName($schema);
 
-            $sourceData = $filesystemHelper->getStructure(\App::langPath()."/{$schema['source_locale']}/", $schema);
-            $targetData = $filesystemHelper->getStructure(\App::langPath()."/{$schema['target_locale']}/", $schema);
+            // Get current state
+            $sourceData = $exportService->get($schema, true);
+            $targetData = $exportService->get($schema, false);
 
-            $viewsData = \App::make(\AnourValar\LaravelInterpreter\Sources\ViewsSource::class)->extract($schema);
-            $sourceData['.json'] = array_replace(
-                ($sourceData['.json'] ?? []),
-                array_combine($viewsData, $viewsData)
-            );
+            // Prepare data for import
+            $sourceDataFlat = $exportService->getFlat($schema, true);
+            $targetDataFlat = $exportService->getFlat($schema, false);
 
-            $translate = $this->getAdapter($schema)->import(file_get_contents($filename));
+            $translate = [];
+            foreach (array_keys($targetDataFlat) as $key) {
+                if (isset($sourceDataFlat[$key])) {
+                    $translate[$sourceDataFlat[$key]] = $targetDataFlat[$key];
+                }
+            }
 
+            $translate = array_replace($translate, $this->load($schema));
+
+            // Handle
             $imported = false;
             foreach ($sourceData as $path => $data) {
                 if (! isset($targetData[$path])) {
@@ -64,7 +71,9 @@ class ImportCommand extends Command
 
                 $data = $this->replace($data, $translate, $schema['lang_files']['exclude_keys']);
                 $data = $this->clean($data);
-                $data = array_replace_recursive($data, $targetData[$path]);
+                if (! $this->option('re-translate')) {
+                    $data = array_replace_recursive($data, $targetData[$path]);
+                }
 
                 if ($data) {
                     $data = $this->sort($data, $sourceData[$path]);
@@ -76,6 +85,7 @@ class ImportCommand extends Command
                 }
             }
 
+            // Feedback
             if ($imported) {
                 $this->info('Translate successfully imported.');
             } else {
@@ -87,18 +97,19 @@ class ImportCommand extends Command
     }
 
     /**
-     * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
-     * @return string
+     * @param array $schema
+     * @return array
      */
-    protected function getFilename(array $schema): string
+    protected function load(array $schema): array
     {
-        $filename = \App::langPath() . '/' . $schema['filename'];
+        $data = [];
 
-        if (! file_exists($filename)) {
-            throw new InputException('Translate not exists. File: "'.$filename.'".');
+        $filename = \App::langPath() . '/' . $schema['filename'];
+        if (file_exists($filename)) {
+            $data = $this->getAdapter($schema)->import(file_get_contents($filename));
         }
 
-        return $filename;
+        return $data;
     }
 
     /**

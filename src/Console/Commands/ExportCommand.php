@@ -14,7 +14,7 @@ class ExportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'interpreter:export {schema} {--slug}';
+    protected $signature = 'interpreter:export {schema} {--slug} {--re-translate}';
 
     /**
      * The console command description.
@@ -22,16 +22,6 @@ class ExportCommand extends Command
      * @var string
      */
     protected $description = 'Create translate file';
-
-    /**
-     * List of sources
-     *
-     * @var array
-     */
-    protected $sources = [
-        \AnourValar\LaravelInterpreter\Sources\LangSource::class,
-        \AnourValar\LaravelInterpreter\Sources\ViewsSource::class,
-    ];
 
     /**
      * Create a new command instance.
@@ -46,40 +36,58 @@ class ExportCommand extends Command
     /**
      * Execute the console command.
      *
+     * @param \AnourValar\LaravelInterpreter\Services\ExportService $exportService
      * @return void
      */
-    public function handle()
+    public function handle(\AnourValar\LaravelInterpreter\Services\ExportService $exportService)
     {
         try {
+            // Input data
             $schema = $this->getSchema($this->argument('schema'));
             $filename = $this->getFileName($schema);
 
-            $data = [];
+            // Get current state
+            $sourceData = $exportService->getFlat($schema, true);
+            $targetData = $exportService->getFlat($schema, false);
 
-            foreach ($this->sources as $source) {
-                $source = \App::make($source);
-                if (! $source instanceof \AnourValar\LaravelInterpreter\Sources\SourceInterface) {
-                    throw new \LogicException('Source must implements SourceInterface.');
+            // Handle
+            $data = [];
+            foreach ($sourceData as $key => $value) {
+                if (in_array($value, $schema['exclude_phrases'])) {
+                    continue;
                 }
 
-                $curr = $source->extract($schema);
-                $data = array_replace($data, array_combine($curr, $curr));
+                if (isset($targetData[$key]) && $this->option('re-translate')) {
+
+                    $data[$value] = $targetData[$key];
+
+                } elseif (isset($targetData[$key]) && !$this->option('re-translate')) {
+
+                    unset($data[$value]);
+                    $schema['exclude_phrases'][] = $value;
+
+                } elseif (! isset($data[$value])) {
+
+                    $data[$value] = $value;
+
+                }
             }
 
-            $data = $this->excludePhrases($data, $schema);
-
+            // Sort the result
             $this->sort($data);
 
+            // Slug?
             if ($this->option('slug')) {
                 $data = $this->slug($data);
             }
 
+            // Save it
             if (! count($data)) {
                 $this->warn('Nothing to export.');
             } elseif (file_put_contents($filename, $this->getAdapter($schema)->export($data))) {
                 $this->info('Translate successfully created. File: "'.$filename.'".');
             } else {
-                $this->error('Cannot save create file "'.$filename.'".');
+                $this->error('Cannot save to file "'.$filename.'".');
             }
         } catch (InputException $e) {
             $this->error($e->getMessage());
@@ -99,22 +107,6 @@ class ExportCommand extends Command
         }
 
         return $filename;
-    }
-
-    /**
-     * @param array $data
-     * @param array $schema
-     * @return array
-     */
-    protected function excludePhrases(array $data, array $schema): array
-    {
-        foreach ($data as $item) {
-            if (in_array($item, $schema['exclude_phrases'])) {
-                unset($data[$item]);
-            }
-        }
-
-        return $data;
     }
 
     /**
