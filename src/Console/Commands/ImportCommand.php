@@ -4,6 +4,8 @@ namespace AnourValar\LaravelInterpreter\Console\Commands;
 
 use AnourValar\LaravelInterpreter\Exceptions\InputException;
 use Illuminate\Console\Command;
+use AnourValar\LaravelInterpreter\Services\ExportService;
+use AnourValar\LaravelInterpreter\Services\ImportService;
 
 class ImportCommand extends Command
 {
@@ -37,17 +39,18 @@ class ImportCommand extends Command
      * Execute the console command.
      *
      * @param \AnourValar\LaravelInterpreter\Services\ExportService $exportService
+     * @param \AnourValar\LaravelInterpreter\Services\ImportService $importService
      * @return void
      */
-    public function handle(\AnourValar\LaravelInterpreter\Services\ExportService $exportService)
+    public function handle(ExportService $exportService, ImportService $importService)
     {
         try {
             // Input data
             $schema = $this->getSchema($this->argument('schema'));
 
             // Get current state
-            $sourceData = $exportService->get($schema, true);
-            $targetData = $exportService->get($schema, false);
+            $sourceData = $exportService->get($schema, true, false);
+            $targetData = $exportService->get($schema, false, true);
 
             // Prepare data for import
             $sourceDataFlat = $exportService->getFlat($schema, true);
@@ -76,10 +79,12 @@ class ImportCommand extends Command
                 }
 
                 if ($data) {
-                    $data = $this->sort($data, $sourceData[$path]);
+                    $data = $this->sort($data, $sourceData[$path], ($path == '.json'));
 
                     if ($data != $targetData[$path]) {
-                        $this->save(\App::langPath()."/{$schema['target_locale']}{$path}", $data, $this->argument('chmod'));
+                        if (! $importService->save(\App::langPath()."/{$schema['target_locale']}{$path}", $data, $this->argument('chmod'))) {
+                            throw new InputException('Cannot save to file "'.$path.'".');
+                        }
                         $imported = true;
                     }
                 }
@@ -173,38 +178,33 @@ class ImportCommand extends Command
     }
 
     /**
-     * @param string $path
-     * @param array $data
-     * @param string $chmod
-     * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
-     */
-    protected function save(string $path, array $data, string $chmod): void
-    {
-        if (preg_match('#\.php$#i', $path)) {
-            $array = $this->exportArray($data, 4);
-
-            $data = file_get_contents(__DIR__.'/../../resources/template.tpl');
-            $data = str_replace('%PASTE HERE%', $array, $data);
-        } else {
-            $data = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n";
-        }
-
-        if (! is_dir(dirname($path))) {
-            mkdir(dirname($path), $chmod, true);
-        }
-
-        if (! file_put_contents($path, $data)) {
-            throw new InputException('Cannot save to file "'.$path.'".');
-        }
-    }
-
-    /**
      * @param array $data
      * @param array $reference
+     * @param boolean $json
      * @return array
      */
-    protected function sort(array $data, array $reference): array
+    protected function sort(array $data, array $reference, bool $json): array
     {
+        if ($json) {
+            uksort(
+                $data,
+                function ($a, $b)
+                {
+                    if (mb_strlen($a) > mb_strlen($b)) {
+                        return -1;
+                    }
+
+                    if (mb_strlen($a) < mb_strlen($b)) {
+                        return 1;
+                    }
+
+                    return $a > $b ? -1 : 1;
+                }
+            );
+
+            return $data;
+        }
+
         uksort(
             $data,
             function ($a, $b) use ($reference)
@@ -225,50 +225,10 @@ class ImportCommand extends Command
 
         foreach ($data as $key => $value) {
             if (is_array($value)) {
-                $data[$key] = $this->sort($data[$key], $reference[$key]);
+                $data[$key] = $this->sort($data[$key], $reference[$key], $json);
             }
         }
 
         return $data;
-    }
-
-    /**
-     * @param array $array
-     * @param integer $indentSize
-     * @return string
-     */
-    protected function exportArray(array $array, int $indentSize): string
-    {
-        $result = '';
-
-        foreach ($array as $key => $value) {
-            if ($result) {
-                $result .= "\n";
-            }
-
-            $key = "'".addCslashes($key, "'")."'";
-
-            if (is_array($value)) {
-                $result .= str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "$key => [";
-
-                $sub = $this->exportArray($value, $indentSize + 4);
-
-                if ($sub) {
-                    $result .= "\n" . $sub . "\n" . str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "],";
-                } else {
-                    $result .= "],";
-                }
-            } else {
-                if (is_null($value)) {
-                    $value = 'null';
-                } elseif (is_string($value)) {
-                    $value = "'".addCslashes($value, "'")."'";
-                }
-
-                $result .= str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "$key => $value,";
-            }
-        }
-
-        return $result;
     }
 }

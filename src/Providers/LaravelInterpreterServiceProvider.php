@@ -16,9 +16,10 @@ class LaravelInterpreterServiceProvider extends ServiceProvider
         // commands
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \AnourValar\LaravelInterpreter\Console\Commands\SchemaCommand::class,
+                \AnourValar\LaravelInterpreter\Console\Commands\CleanCommand::class,
                 \AnourValar\LaravelInterpreter\Console\Commands\ExportCommand::class,
                 \AnourValar\LaravelInterpreter\Console\Commands\ImportCommand::class,
+                \AnourValar\LaravelInterpreter\Console\Commands\SchemaCommand::class,
             ]);
         }
     }

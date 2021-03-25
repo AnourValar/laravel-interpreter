@@ -11,18 +11,19 @@ class ExportService
      *
      * @param array $schema
      * @param boolean $source
+     * @param boolean $ignoreFilters
      * @return array
      */
-    public function get(array $schema, bool $source): array
+    public function get(array $schema, bool $source, bool $ignoreFilters): array
     {
         if ($source) {
-            $data = $this->getStructure(\App::langPath()."/{$schema['source_locale']}/", $schema);
+            $data = $this->getStructure(\App::langPath()."/{$schema['source_locale']}/", $schema, $ignoreFilters);
             $data['.json'] = array_replace(($data['.json'] ?? []), $this->walk($schema));
 
             return $data;
         }
 
-        return $this->getStructure(\App::langPath()."/{$schema['target_locale']}/", $schema, true);
+        return $this->getStructure(\App::langPath()."/{$schema['target_locale']}/", $schema, $ignoreFilters);
     }
 
     /**
@@ -34,7 +35,7 @@ class ExportService
      */
     public function getFlat(array $schema, bool $source): array
     {
-        return $this->flatten( $this->get($schema, $source) );
+        return $this->flatten( $this->get($schema, $source, !$source) );
     }
 
     /**
@@ -62,10 +63,10 @@ class ExportService
     /**
      * @param string $path
      * @param array $schema
-     * @param boolean $ignoreFilter
+     * @param boolean $ignoreFilters
      * @return array
      */
-    protected function getStructure(string $path, array $schema, bool $ignoreFilter = false, $trimLength = 0): array
+    protected function getStructure(string $path, array $schema, bool $ignoreFilters = false, $trimLength = 0): array
     {
         $result = [];
         $path = rtrim($path, '/');
@@ -74,7 +75,7 @@ class ExportService
             $trimLength = mb_strlen($path);
         }
 
-        if (is_file($path.'.json') && ($ignoreFilter || $schema['include_json'])) {
+        if (is_file($path.'.json') && ($ignoreFilters || $schema['include_json'])) {
             $result['.json'] = $this->load($path.'.json');
         }
 
@@ -88,11 +89,11 @@ class ExportService
                 $relativePath = mb_substr($fullpath, $trimLength);
 
                 if (is_dir($fullpath)) {
-                    $result = array_replace($result, $this->getStructure($fullpath, $schema, $ignoreFilter, $trimLength));
-                } elseif ($ignoreFilter || $this->passes($fullpath, $schema['lang_files'])) {
+                    $result = array_replace($result, $this->getStructure($fullpath, $schema, $ignoreFilters, $trimLength));
+                } elseif ($ignoreFilters || $this->passes($fullpath, $schema['lang_files'])) {
                     $result[$relativePath] = $this->load($fullpath);
 
-                    if (! $ignoreFilter) {
+                    if (! $ignoreFilters) {
                         $result[$relativePath] = $this->excludeKeys($result[$relativePath], $schema['lang_files']['exclude_keys']);
                     }
                 }
