@@ -81,13 +81,13 @@ trait WalkTrait
     protected function passes(string $path, array $rules): bool
     {
         foreach ($rules['exclude'] as $item) {
-            if (stripos($path, $item) !== false) {
+            if (stripos(str_replace('\\', '/', $path), str_replace('\\', '/', $item)) !== false) {
                 return false;
             }
         }
 
         foreach ($rules['include'] as $item) {
-            if (stripos($path, $item) !== false) {
+            if (stripos(str_replace('\\', '/', $path), str_replace('\\', '/', $item)) !== false) {
                 return true;
             }
         }
