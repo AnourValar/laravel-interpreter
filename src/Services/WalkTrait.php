@@ -58,7 +58,12 @@ trait WalkTrait
 
         $result = [];
 
-        preg_match_all('|\@lang\(\s*([\'\"])(.*?)(?<!\\\)\1|s', $view, $patterns);
+        preg_match_all('|\@lang\(\s*([\'\"])(.*?)(?<!\\\)\1|is', $view, $patterns);
+        if (isset($patterns[2])) {
+            $result = array_merge($result, $patterns[2]);
+        }
+
+        preg_match_all('|\@choice\(\s*([\'\"])(.*?)(?<!\\\)\1|is', $view, $patterns);
         if (isset($patterns[2])) {
             $result = array_merge($result, $patterns[2]);
         }
