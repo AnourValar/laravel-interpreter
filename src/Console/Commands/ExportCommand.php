@@ -53,7 +53,7 @@ class ExportCommand extends Command
             // Handle
             $data = [];
             foreach ($sourceData as $key => $value) {
-                if (in_array($value, $schema['exclude_phrases'])) {
+                if (in_array($value, $schema['exclude_phrases'], true)) {
                     continue;
                 }
 

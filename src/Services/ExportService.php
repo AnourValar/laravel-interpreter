@@ -113,7 +113,7 @@ class ExportService
         $result = [];
 
         foreach ($data as $key => $value) {
-            if (in_array($key, $excludeKeys)) {
+            if (in_array($key, $excludeKeys, true)) {
                 continue;
             }
 

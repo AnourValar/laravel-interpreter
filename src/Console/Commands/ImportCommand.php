@@ -126,7 +126,7 @@ class ImportCommand extends Command
     protected function replace(array $source, array $data, array $excludeKeys): array
     {
         foreach ($source as $key => $value) {
-            if (in_array($key, $excludeKeys)) {
+            if (in_array($key, $excludeKeys, true)) {
                 unset($source[$key]);
                 continue;
             }
