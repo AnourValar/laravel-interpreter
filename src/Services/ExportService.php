@@ -17,13 +17,20 @@ class ExportService
     public function get(array $schema, bool $source, bool $ignoreFilters): array
     {
         if ($source) {
-            $data = $this->getStructure(\App::langPath()."/{$schema['source_locale']}/", $schema, $ignoreFilters);
-            $data['.json'] = array_replace(($data['.json'] ?? []), $this->walk($schema));
+            $data = array_replace(
+                $this->getStructure(\App::langPath()."/{$schema['source_locale']}/", $schema, $ignoreFilters, $schema['source_locale']),
+                $this->getVendor($schema, $ignoreFilters, $schema['source_locale'])
+            );
+
+            $data['/<locale>.json'] = array_replace(($data['/<locale>.json'] ?? []), $this->walk($schema));
 
             return $data;
         }
 
-        return $this->getStructure(\App::langPath()."/{$schema['target_locale']}/", $schema, $ignoreFilters);
+        return array_replace(
+            $this->getStructure(\App::langPath()."/{$schema['target_locale']}/", $schema, $ignoreFilters, $schema['target_locale']),
+            $this->getVendor($schema, $ignoreFilters, $schema['target_locale'])
+        );
     }
 
     /**
@@ -36,6 +43,37 @@ class ExportService
     public function getFlat(array $schema, bool $source): array
     {
         return $this->flatten( $this->get($schema, $source, !$source) );
+    }
+
+    /**
+     * @param array $schema
+     * @param boolean $ignoreFilters
+     * @param string $currLocale
+     * @return array
+     */
+    protected function getVendor(array $schema, bool $ignoreFilters, string $currLocale): array
+    {
+        $data = [];
+
+        $vendorPath = \App::langPath('vendor') . '/vendor/';
+        if (is_dir($vendorPath)) {
+            foreach (scandir($vendorPath) as $item) {
+                if (in_array($item, ['.', '..'])) {
+                    continue;
+                }
+
+                if (! is_dir($vendorPath.$item)) {
+                    continue;
+                }
+
+                $data = array_replace(
+                    $data,
+                    $this->getStructure($vendorPath."$item/$currLocale/", $schema, $ignoreFilters, $currLocale)
+                );
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -64,19 +102,16 @@ class ExportService
      * @param string $path
      * @param array $schema
      * @param boolean $ignoreFilters
+     * @param string $currLocale
      * @return array
      */
-    protected function getStructure(string $path, array $schema, bool $ignoreFilters = false, $trimLength = 0): array
+    protected function getStructure(string $path, array $schema, bool $ignoreFilters = false, string $currLocale): array
     {
         $result = [];
         $path = rtrim($path, '/');
 
-        if (! $trimLength) {
-            $trimLength = mb_strlen($path);
-        }
-
         if (is_file($path.'.json') && ($ignoreFilters || $schema['include_json'])) {
-            $result['.json'] = $this->load($path.'.json');
+            $result['/<locale>.json'] = $this->load($path.'.json');
         }
 
         if (is_dir($path)) {
@@ -86,11 +121,13 @@ class ExportService
                 }
 
                 $fullpath = "$path/$structure";
-                $relativePath = mb_substr($fullpath, $trimLength);
+                $relativePath = mb_substr($fullpath, mb_strlen(\App::langPath()));
+                $relativePath = preg_replace('#\/'.preg_quote($currLocale).'\/#', '/<locale>/', $relativePath, 1);
+                $searchPath = preg_replace('#\/'.preg_quote($currLocale).'\/#', '/<locale>/', $fullpath);
 
                 if (is_dir($fullpath)) {
-                    $result = array_replace($result, $this->getStructure($fullpath, $schema, $ignoreFilters, $trimLength));
-                } elseif ($ignoreFilters || $this->passes($fullpath, $schema['lang_files'])) {
+                    $result = array_replace($result, $this->getStructure($fullpath, $schema, $ignoreFilters, $currLocale));
+                } elseif ($ignoreFilters || $this->passes($searchPath, $schema['lang_files'])) {
                     $result[$relativePath] = $this->load($fullpath);
 
                     if (! $ignoreFilters) {

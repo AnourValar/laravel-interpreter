@@ -67,12 +67,13 @@ class CleanCommand extends Command
                 }
 
                 $saved = true;
+                $path = str_replace('<locale>', $schema['target_locale'], $path);
                 if ($newData) {
-                    if (! $importService->save(\App::langPath()."/{$schema['target_locale']}{$path}", $newData)) {
+                    if (! $importService->save(\App::langPath() . $path, $newData)) {
                         throw new InputException('Cannot save to file "'.$path.'".');
                     }
                 } else {
-                    unlink(\App::langPath()."/{$schema['target_locale']}{$path}");
+                    unlink(\App::langPath() . $path);
                 }
             }
 

@@ -52,7 +52,11 @@ class ImportService
                 $sub = $this->exportArray($value, $indentSize + 4);
 
                 if ($sub) {
-                    $result .= "\n" . $sub . "\n" . str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "],";
+                   if (stripos($sub, "\n")) {
+                        $result .= "\n" . $sub . "\n" . str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "],";
+                    } else {
+                        $result .= trim($sub)."],";
+                    }
                 } else {
                     $result .= "],";
                 }

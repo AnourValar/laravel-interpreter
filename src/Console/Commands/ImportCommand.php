@@ -79,10 +79,12 @@ class ImportCommand extends Command
                 }
 
                 if ($data) {
-                    $data = $this->sort($data, $sourceData[$path], ($path == '.json'));
+                    $data = $this->sort($data, $sourceData[$path], ($path == '/<locale>.json'));
 
                     if ($data != $targetData[$path]) {
-                        if (! $importService->save(\App::langPath()."/{$schema['target_locale']}{$path}", $data, $this->argument('chmod'))) {
+                        $path = str_replace('<locale>', $schema['target_locale'], $path);
+
+                        if (! $importService->save(\App::langPath() . $path, $data, $this->argument('chmod'))) {
                             throw new InputException('Cannot save to file "'.$path.'".');
                         }
                         $imported = true;
