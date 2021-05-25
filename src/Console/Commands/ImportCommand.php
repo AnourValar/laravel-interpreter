@@ -227,7 +227,7 @@ class ImportCommand extends Command
 
         foreach ($data as $key => $value) {
             if (is_array($value)) {
-                $data[$key] = $this->sort($data[$key], $reference[$key], $json);
+                $data[$key] = $this->sort($data[$key], ($reference[$key] ?? $data[$key]), $json);
             }
         }
 

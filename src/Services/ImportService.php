@@ -55,7 +55,7 @@ class ImportService
                    if (stripos($sub, "\n")) {
                         $result .= "\n" . $sub . "\n" . str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "],";
                     } else {
-                        $result .= trim($sub)."],";
+                        $result .= trim(mb_substr($sub, 0, -1))."],";
                     }
                 } else {
                     $result .= "],";
