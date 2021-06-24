@@ -34,6 +34,17 @@ class ExportService
     }
 
     /**
+     * Get unwrapped phrases
+     *
+     * @param array $schema
+     * @return array
+     */
+    public function getMissed(array $schema): array
+    {
+        return $this->walkForMissed($schema);
+    }
+
+    /**
      * Retrieve current translate (flat)
      *
      * @param array $schema

@@ -14,7 +14,7 @@ class ExportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'interpreter:export {schema} {--slug} {--re-translate}';
+    protected $signature = 'interpreter:export {schema} {--slug} {--re-translate} {--force}';
 
     /**
      * The console command description.
@@ -24,22 +24,29 @@ class ExportCommand extends Command
     protected $description = 'Create translate file';
 
     /**
+     * @var \AnourValar\LaravelInterpreter\Services\ExportService
+     */
+    private $exportService;
+
+    /**
      * Create a new command instance.
      *
+     * @param \AnourValar\LaravelInterpreter\Services\ExportService $exportService
      * @return void
      */
-    public function __construct()
+    public function __construct(\AnourValar\LaravelInterpreter\Services\ExportService $exportService)
     {
+        $this->exportService = $exportService;
+
         parent::__construct();
     }
 
     /**
      * Execute the console command.
      *
-     * @param \AnourValar\LaravelInterpreter\Services\ExportService $exportService
      * @return void
      */
-    public function handle(\AnourValar\LaravelInterpreter\Services\ExportService $exportService)
+    public function handle()
     {
         try {
             // Input data
@@ -47,8 +54,8 @@ class ExportCommand extends Command
             $filename = $this->getFileName($schema);
 
             // Get current state
-            $sourceData = $exportService->getFlat($schema, true);
-            $targetData = $exportService->getFlat($schema, false);
+            $sourceData = $this->exportService->getFlat($schema, true);
+            $targetData = $this->exportService->getFlat($schema, false);
 
             // Handle
             $data = [];
@@ -81,6 +88,9 @@ class ExportCommand extends Command
                 $data = $this->slug($data);
             }
 
+            // Missed phrases?
+            $this->reportForMissed($schema);
+
             // Save it
             if (! count($data)) {
                 $this->warn('Nothing to export.');
@@ -102,7 +112,7 @@ class ExportCommand extends Command
     {
         $filename = \App::langPath() . '/' . $schema['filename'];
 
-        if (file_exists($filename)) {
+        if (!$this->option('force') && file_exists($filename)) {
             throw new InputException('Translate already exists. File: "'.$filename.'".');
         }
 
@@ -143,5 +153,24 @@ class ExportCommand extends Command
         unset($value);
 
         return $data;
+    }
+
+    /**
+     * @param array $schema
+     * @return void
+     */
+    protected function reportForMissed(array $schema): void
+    {
+        $data = [];
+        foreach ($this->exportService->getMissed($schema) as $file => $phrases) {
+            $data[] = [str_replace(resource_path(''), '', $file), implode(' / ', $phrases)];
+        }
+
+        if ($data) {
+            $this->getOutput()->newLine();
+            $this->alert('Missed phrases');
+            $this->table(['View', 'Phrases'], $data);
+            $this->getOutput()->newLine(2);
+        }
     }
 }

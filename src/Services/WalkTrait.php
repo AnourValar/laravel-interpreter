@@ -13,11 +13,26 @@ trait WalkTrait
         $phrases = [];
 
         foreach ($this->getViews((array)config('view.paths'), $schema) as $view) {
-            $phrases = array_merge($phrases, $this->getPhrases($view));
+            $phrases = array_merge($phrases, $this->parsePhrases($view));
         }
 
         $phrases = array_filter(array_unique($phrases));
         return array_combine($phrases, $phrases);
+    }
+
+    /**
+     * @param array $schema
+     * @return array
+     */
+    protected function walkForMissed(array $schema): array
+    {
+        $phrases = [];
+
+        foreach ($this->getViews((array)config('view.paths'), $schema) as $path => $view) {
+            $phrases = array_merge($phrases, $this->parseMissed($view, $path));
+        }
+
+        return $phrases;
     }
 
     /**
@@ -40,7 +55,7 @@ trait WalkTrait
                 if (is_dir($item)) {
                     $result = array_merge($result, $this->getViews((array)$item, $schema));
                 } elseif (stripos($item, '.php') && $this->passes($item, $schema['view_files'])) {
-                    $result[] = file_get_contents($item);
+                    $result[$item] = file_get_contents($item);
                 }
             }
         }
@@ -52,25 +67,47 @@ trait WalkTrait
      * @param string $view
      * @return array
      */
-    protected function getPhrases(string $view): array
+    protected function parsePhrases(string $view): array
     {
-        $view = preg_replace('#\{\{\-\-.*\-\-\}\}#sU', '<>', $view);
+        foreach (config('interpreter.regexp_garbage') as $regexp) {
+            $view = preg_replace($regexp, '<>', $view);
+        }
 
         $result = [];
 
-        preg_match_all('|\@lang\(\s*([\'\"])(.*?)(?<!\\\)\1|is', $view, $patterns);
-        if (isset($patterns[2])) {
-            $result = array_merge($result, $patterns[2]);
+        foreach (config('interpreter.regexp_wrap') as $regexp) {
+            preg_match_all($regexp, $view, $patterns);
+
+            if (isset($patterns[2])) {
+                $result = array_merge($result, $patterns[2]);
+            }
         }
 
-        preg_match_all('|\@choice\(\s*([\'\"])(.*?)(?<!\\\)\1|is', $view, $patterns);
-        if (isset($patterns[2])) {
-            $result = array_merge($result, $patterns[2]);
+        return $result;
+    }
+
+    /**
+     * @param string $view
+     * @param string $path
+     * @return array
+     */
+    protected function parseMissed(string $view, string $path): array
+    {
+        foreach (config('interpreter.regexp_garbage') as $regexp) {
+            $view = preg_replace($regexp, '<>', $view);
         }
 
-        preg_match_all('|\_\_\(\s*([\'\"])(.*?)(?<!\\\)\1|s', $view, $patterns);
-        if (isset($patterns[2])) {
-            $result = array_merge($result, $patterns[2]);
+        $result = [];
+
+        foreach (config('interpreter.regexp_wrap') as $regexp) {
+            $view = preg_replace($regexp, '', $view);
+        }
+
+        foreach (config('interpreter.regexp_miss') as $regexp) {
+            preg_match_all($regexp, $view, $patterns);
+            if ($patterns[0]) {
+                $result[$path] = array_merge(($result[$path] ?? []), $patterns[0]);
+            }
         }
 
         return $result;
