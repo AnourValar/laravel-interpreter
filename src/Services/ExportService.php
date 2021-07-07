@@ -116,7 +116,7 @@ class ExportService
      * @param string $currLocale
      * @return array
      */
-    protected function getStructure(string $path, array $schema, bool $ignoreFilters = false, string $currLocale): array
+    protected function getStructure(string $path, array $schema, bool $ignoreFilters, string $currLocale): array
     {
         $result = [];
         $path = rtrim($path, '/');
