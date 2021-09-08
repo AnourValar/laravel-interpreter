@@ -79,6 +79,12 @@ trait WalkTrait
             preg_match_all($regexp, $view, $patterns);
 
             if (isset($patterns[2])) {
+                foreach ($patterns[2] as $key => &$item) {
+                    $item = str_replace('\\\\', '\\', $item);
+                    $item = str_replace('\\'.$patterns[1][$key], $patterns[1][$key], $item);
+                }
+                unset($item);
+
                 $result = array_merge($result, $patterns[2]);
             }
         }

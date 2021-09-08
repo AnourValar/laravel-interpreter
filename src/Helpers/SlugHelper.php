@@ -2,7 +2,7 @@
 
 namespace AnourValar\LaravelInterpreter\Helpers;
 
-class SlugHelper extends \Illuminate\Support\Str
+class SlugHelper
 {
     /**
      * Translit string
@@ -16,10 +16,6 @@ class SlugHelper extends \Illuminate\Support\Str
             return $value;
         }
 
-        foreach (static::charsArray() as $key => $val) {
-            $value = str_replace($val, $key, $value);
-        }
-
-        return $value;
+        return \Illuminate\Support\Str::ascii($value, 'en');
     }
 }
