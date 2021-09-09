@@ -1,5 +1,10 @@
 # Laravel Interpreter
 
+This package allows you:
+* collect all untranslated phrases from your project to a single file for a translator.
+* save all translated phrases from a single file to the project's structure.
+
+
 ## Installation
 
 ```bash
@@ -9,22 +14,57 @@ composer require anourvalar/laravel-interpreter --dev
 
 ## Usage
 
-First step: Create translate schema (config) for target locale
+Step #1: Create schema (config) for a target locale
 
 ```bash
-php artisan interpreter:schema de
+php artisan interpreter:schema ru
 ```
 
 
-Second step: Generate translation file for specified schema
+Step #2: Fill in the config
 
-```bash
-php artisan interpreter:export de
+```json
+{
+    "source_locale": "en", // reference (fallback) locale
+    "target_locale": "ru",
+
+    "adapter": "AnourValar\\LaravelInterpreter\\Adapters\\JsonAdapter",
+    "filename": "te_i18.json",
+
+    "include_json": true, // include phrases from lang/en.json
+
+    "lang_files": {
+        "exclude": [],
+
+        "include": [
+            "/admin/" // include all files inside folder lang/en/admin/*
+		],
+
+        "exclude_keys": []
+    },
+
+    "view_files": {
+        "exclude": [],
+
+        "include": [
+            "/admin/" // include all files (parse phrases) inside folder views/admin/*
+		]
+    },
+
+    "exclude_phrases": []
+}
 ```
 
 
-Third step: Generate locale's files using filled translation file
+Step #3: Generate a single file using schema
 
 ```bash
-php artisan interpreter:import de
+php artisan interpreter:export ru
+```
+
+
+Step #4: Save filled single file to the project's structure
+
+```bash
+php artisan interpreter:import ru
 ```

@@ -21,7 +21,7 @@ class ExportCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create translate file';
+    protected $description = 'Generate a single file with phrases for translate';
 
     /**
      * @var \AnourValar\LaravelInterpreter\Services\ExportService

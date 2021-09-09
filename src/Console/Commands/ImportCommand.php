@@ -23,7 +23,7 @@ class ImportCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Update locale from filled file';
+    protected $description = 'Update project\'s structure from a filled single file';
 
     /**
      * Create a new command instance.

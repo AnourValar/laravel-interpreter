@@ -23,7 +23,7 @@ class CleanCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Cleaning localization keys';
+    protected $description = 'Clean unused translates (garbage)';
 
     /**
      * Create a new command instance.

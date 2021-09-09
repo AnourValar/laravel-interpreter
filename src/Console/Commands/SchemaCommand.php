@@ -18,7 +18,7 @@ class SchemaCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create schema (config) for export & import';
+    protected $description = 'Create schema (config) for a locale';
 
     /**
      * Create a new command instance.
