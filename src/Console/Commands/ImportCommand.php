@@ -135,6 +135,15 @@ class ImportCommand extends Command
 
             if (is_scalar($value)) {
                 foreach ($data as $original => $translate) {
+                    $valueFirst = mb_substr($value, 0, 1);
+                    if ($valueFirst === mb_strtoupper($valueFirst)) {
+                        $original = mb_strtoupper(mb_substr($original, 0, 1)) . mb_substr($original, 1);
+                        $translate = mb_strtoupper(mb_substr($translate, 0, 1)) . mb_substr($translate, 1);
+                    } elseif ($valueFirst === mb_strtolower($valueFirst)) {
+                        $original = mb_strtolower(mb_substr($original, 0, 1)) . mb_substr($original, 1);
+                        $translate = mb_strtolower(mb_substr($translate, 0, 1)) . mb_substr($translate, 1);
+                    }
+
                     if ($value == $original) {
                         $source[$key] = $translate;
 

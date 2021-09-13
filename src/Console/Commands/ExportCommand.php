@@ -78,6 +78,18 @@ class ExportCommand extends Command
                     $data[$value] = $value;
 
                 }
+
+                $valueUpper = mb_strtoupper(mb_substr($value, 0, 1)) . mb_substr($value, 1);
+                $valueLower = mb_strtolower(mb_substr($value, 0, 1)) . mb_substr($value, 1);
+                if ($valueUpper !== $valueLower) {
+                    if ($value === $valueUpper && isset($data[$valueLower])) {
+                        unset($data[$value]);
+                    }
+
+                    if ($value === $valueLower && isset($data[$valueUpper])) {
+                        unset($data[$value]);
+                    }
+                }
             }
 
             // Sort the result
@@ -145,10 +157,10 @@ class ExportCommand extends Command
      */
     protected function slug(array $data): array
     {
-        $slugHelper = \App::make(\AnourValar\LaravelInterpreter\Helpers\SlugHelper::class);
-
         foreach ($data as &$value) {
-            $value = $slugHelper->translit($value);
+            if (is_string($value)) {
+                $value = \Illuminate\Support\Str::ascii($value, 'en');
+            }
         }
         unset($value);
 
