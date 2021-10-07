@@ -77,7 +77,7 @@ class CleanCommand extends Command
                 }
             }
 
-            // Feedback
+            // Response
             if ($saved) {
                 $this->info('Translate successfully cleaned.');
             } else {

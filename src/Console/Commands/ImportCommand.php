@@ -92,7 +92,7 @@ class ImportCommand extends Command
                 }
             }
 
-            // Feedback
+            // Response
             if ($imported) {
                 $this->info('Translate successfully imported.');
             } else {

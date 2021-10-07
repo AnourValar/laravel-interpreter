@@ -7,6 +7,16 @@ use Illuminate\Support\ServiceProvider;
 class LaravelInterpreterServiceProvider extends ServiceProvider
 {
     /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+
+    }
+
+    /**
      * Bootstrap any application services.
      *
      * @return void
@@ -24,17 +34,8 @@ class LaravelInterpreterServiceProvider extends ServiceProvider
                 \AnourValar\LaravelInterpreter\Console\Commands\ExportCommand::class,
                 \AnourValar\LaravelInterpreter\Console\Commands\ImportCommand::class,
                 \AnourValar\LaravelInterpreter\Console\Commands\SchemaCommand::class,
+                \AnourValar\LaravelInterpreter\Console\Commands\WrapCommand::class,
             ]);
         }
-    }
-
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-
     }
 }

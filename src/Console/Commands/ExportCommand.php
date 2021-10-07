@@ -103,7 +103,7 @@ class ExportCommand extends Command
             // Missed phrases?
             $this->reportForMissed($schema);
 
-            // Save it
+            // Result
             if (! count($data)) {
                 $this->warn('Nothing to export.');
             } elseif (file_put_contents($filename, $this->getAdapter($schema)->export($data))) {
