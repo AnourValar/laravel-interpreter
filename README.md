@@ -1,8 +1,7 @@
 # Laravel Interpreter
-
-This package allows you:
-* collect all untranslated phrases from your project to a single file for a translator.
-* save all translated phrases from a single file to the project's structure.
+* Exporting all untranslated phrases from your project to a single file for a translator.
+* Importing all translated phrases from a single file to your project's structure.
+* Wrapping skipped text phrases with @lang() directive.
 
 
 ## Installation
@@ -12,16 +11,16 @@ composer require anourvalar/laravel-interpreter --dev
 ```
 
 
-## Usage
+## Usage: basic flow
 
-Step #1: Create schema (config) for a target locale
+**Step #1: Create schema (config) for a target locale**
 
 ```bash
 php artisan interpreter:schema ru
 ```
 
 
-Step #2: Fill in the config
+**Step #2: Fill in the config**
 
 ```json
 {
@@ -56,15 +55,35 @@ Step #2: Fill in the config
 ```
 
 
-Step #3: Generate a single file using schema
+**Step #3: Generate a single file using schema**
 
 ```bash
 php artisan interpreter:export ru
 ```
 
 
-Step #4: Save filled single file to the project's structure
+**Step #4: Save filled single file to the project's structure**
 
 ```bash
 php artisan interpreter:import ru
+```
+
+
+## Usage: wrap
+
+```bash
+php artisan interpreter:wrap resources/views/test.blade.php
+```
+
+**Original template**
+
+```html
+<div>Привет, Мир!</div>
+```
+
+
+**Modified template**
+
+```html
+<div>@lang('Привет, Мир!')</div>
 ```

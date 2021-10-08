@@ -111,7 +111,7 @@ class WrapCommand extends Command
                         $counter++;
 
                         $value = str_pad('', (mb_strlen($pattern[0]) - mb_strlen(ltrim($pattern[0]))), ' ', STR_PAD_LEFT);
-                        $value .= sprintf($wrap, addcslashes(trim($pattern[0]), "\\'"));
+                        $value .= sprintf($wrap, addcslashes(preg_replace('#\s+#', ' ', trim($pattern[0])), "\\'"));
                         $value .= str_pad('', (mb_strlen($pattern[0]) - mb_strlen(rtrim($pattern[0]))), ' ', STR_PAD_RIGHT);
 
                         return $value;
