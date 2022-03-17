@@ -24,21 +24,11 @@ class WrapCommand extends Command
     protected $description = 'To wrap skipped phrases';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @param \AnourValar\LaravelInterpreter\Services\ExportService $exportService
      * @param \AnourValar\LaravelInterpreter\Services\ImportService $importService
-     * @return void
+     * @return int
      */
     public function handle(ExportService $exportService, ImportService $importService)
     {
@@ -63,12 +53,14 @@ class WrapCommand extends Command
         } catch (InputException $e) {
             $this->error($e->getMessage());
         }
+
+        return Command::SUCCESS;
     }
 
     /**
      * @param string $template
      * @param string $wrap
-     * @param integer $counter
+     * @param int $counter
      * @return string
      */
     protected function wrap(string $template, string $wrap, int &$counter = null): string

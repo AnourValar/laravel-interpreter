@@ -21,19 +21,9 @@ class SchemaCommand extends Command
     protected $description = 'Create schema (config) for a locale';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
-     * @return void
+     * @return int
      */
     public function handle()
     {
@@ -57,5 +47,7 @@ class SchemaCommand extends Command
             $this->info('Schema successfully created. File: "'.$path.'".');
 
         }
+
+        return Command::SUCCESS;
     }
 }

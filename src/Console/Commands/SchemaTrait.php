@@ -13,7 +13,7 @@ trait SchemaTrait
      */
     protected function getSchema(?string $schema): array
     {
-        $path = \App::langPath() .'/' . $schema . '_schema.json';
+        $path = \App::langPath() . '/' . $schema . '_schema.json';
 
         if (! file_exists($path)) {
             throw new InputException('Schema file "'.$path.'" not exists.');

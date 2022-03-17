@@ -10,7 +10,7 @@ class ImportService
      * @param string $path
      * @param array $data
      * @param string $chmod
-     * @return boolean
+     * @return bool
      */
     public function save(string $path, array $data, string $chmod = '0755'): bool
     {
@@ -32,7 +32,7 @@ class ImportService
 
     /**
      * @param array $array
-     * @param integer $indentSize
+     * @param int $indentSize
      * @return string
      */
     private function exportArray(array $array, int $indentSize): string

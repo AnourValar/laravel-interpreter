@@ -26,21 +26,11 @@ class CleanCommand extends Command
     protected $description = 'Clean unused translates (garbage)';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @param \AnourValar\LaravelInterpreter\Services\ExportService $exportService
      * @param \AnourValar\LaravelInterpreter\Services\ImportService $importService
-     * @return void
+     * @return int
      */
     public function handle(ExportService $exportService, ImportService $importService)
     {
@@ -86,6 +76,8 @@ class CleanCommand extends Command
         } catch (InputException $e) {
             $this->error($e->getMessage());
         }
+
+        return Command::SUCCESS;
     }
 
     /**

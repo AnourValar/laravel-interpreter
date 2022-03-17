@@ -26,21 +26,11 @@ class ImportCommand extends Command
     protected $description = 'Update project\'s structure from a filled single file';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @param \AnourValar\LaravelInterpreter\Services\ExportService $exportService
      * @param \AnourValar\LaravelInterpreter\Services\ImportService $importService
-     * @return void
+     * @return int
      */
     public function handle(ExportService $exportService, ImportService $importService)
     {
@@ -101,6 +91,8 @@ class ImportCommand extends Command
         } catch (InputException $e) {
             $this->error($e->getMessage());
         }
+
+        return Command::SUCCESS;
     }
 
     /**
@@ -191,7 +183,7 @@ class ImportCommand extends Command
     /**
      * @param array $data
      * @param array $reference
-     * @param boolean $json
+     * @param bool $json
      * @return array
      */
     protected function sort(array $data, array $reference, bool $json): array

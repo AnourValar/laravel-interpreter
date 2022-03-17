@@ -44,7 +44,7 @@ class ExportCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return void
+     * @return int
      */
     public function handle()
     {
@@ -114,6 +114,8 @@ class ExportCommand extends Command
         } catch (InputException $e) {
             $this->error($e->getMessage());
         }
+
+        return Command::SUCCESS;
     }
 
     /**

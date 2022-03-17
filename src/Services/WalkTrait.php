@@ -12,7 +12,7 @@ trait WalkTrait
     {
         $phrases = [];
 
-        foreach ($this->getViews((array)config('view.paths'), $schema) as $view) {
+        foreach ($this->getViews((array) config('view.paths'), $schema) as $view) {
             $phrases = array_merge($phrases, $this->parsePhrases($view));
         }
 
@@ -28,7 +28,7 @@ trait WalkTrait
     {
         $phrases = [];
 
-        foreach ($this->getViews((array)config('view.paths'), $schema) as $path => $view) {
+        foreach ($this->getViews((array) config('view.paths'), $schema) as $path => $view) {
             $phrases = array_merge($phrases, $this->parseMissed($view, $path));
         }
 
@@ -53,7 +53,7 @@ trait WalkTrait
                 $item = "$path/$item";
 
                 if (is_dir($item)) {
-                    $result = array_merge($result, $this->getViews((array)$item, $schema));
+                    $result = array_merge($result, $this->getViews((array) $item, $schema));
                 } elseif (stripos($item, '.php') && $this->passes($item, $schema['view_files'])) {
                     $result[$item] = file_get_contents($item);
                 }
@@ -124,7 +124,7 @@ trait WalkTrait
      *
      * @param string $path
      * @param array $rules
-     * @return boolean
+     * @return bool
      */
     protected function passes(string $path, array $rules): bool
     {

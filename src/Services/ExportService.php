@@ -10,8 +10,8 @@ class ExportService
      * Retrieve current translate
      *
      * @param array $schema
-     * @param boolean $source
-     * @param boolean $ignoreFilters
+     * @param bool $source
+     * @param bool $ignoreFilters
      * @return array
      */
     public function get(array $schema, bool $source, bool $ignoreFilters): array
@@ -48,7 +48,7 @@ class ExportService
      * Retrieve current translate (flat)
      *
      * @param array $schema
-     * @param boolean $source
+     * @param bool $source
      * @return array
      */
     public function getFlat(array $schema, bool $source): array
@@ -58,7 +58,7 @@ class ExportService
 
     /**
      * @param array $schema
-     * @param boolean $ignoreFilters
+     * @param bool $ignoreFilters
      * @param string $currLocale
      * @return array
      */
@@ -66,7 +66,7 @@ class ExportService
     {
         $data = [];
 
-        $vendorPath = \App::langPath('vendor') . '/vendor/';
+        $vendorPath = \App::langPath() . '/vendor/';
         if (is_dir($vendorPath)) {
             foreach (scandir($vendorPath) as $item) {
                 if (in_array($item, ['.', '..'])) {
@@ -112,7 +112,7 @@ class ExportService
     /**
      * @param string $path
      * @param array $schema
-     * @param boolean $ignoreFilters
+     * @param bool $ignoreFilters
      * @param string $currLocale
      * @return array
      */
@@ -177,7 +177,7 @@ class ExportService
 
     /**
      * @param string $fullpath
-     * @return array|NULL
+     * @return array|null
      */
     protected function load(string $fullpath): ?array
     {
@@ -188,7 +188,7 @@ class ExportService
         if (preg_match('#\.json$#', $fullpath)) {
             $data = json_decode(file_get_contents($fullpath), true);
 
-            foreach ((array)$data as $key => $item) {
+            foreach ((array) $data as $key => $item) {
                 if (! isset($item)) {
                     $data[$key] = $key;
                 }
