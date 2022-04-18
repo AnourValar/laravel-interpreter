@@ -1,7 +1,7 @@
 # Laravel Interpreter
-* Exporting all untranslated phrases from your project to a single file for a translator.
-* Importing all translated phrases from a single file to your project's structure.
-* Wrapping skipped text phrases with @lang() directive.
+* Export all untranslated phrases from your project to a single file for a translator.
+* Import all translated phrases from a single file to your project's structure.
+* Find & wrap text phrases with missed @lang() directive in your blade templates.
 
 
 ## Installation
@@ -24,45 +24,47 @@ php artisan interpreter:schema ru
 
 ```json
 {
-    "source_locale": "en", // reference (fallback) locale
-    "target_locale": "ru",
+  "source_locale": "en", // reference (source) locale
+  "target_locale": "ru",
 
-    "adapter": "AnourValar\\LaravelInterpreter\\Adapters\\JsonAdapter",
-    "filename": "te_i18.json",
+  "adapter": "AnourValar\\LaravelInterpreter\\Adapters\\JsonAdapter",
+  "filename": "ru_i18.json",
 
-    "include_json": true, // include phrases from lang/en.json
+  "include_json": true, // include phrases from lang/en.json
 
-    "lang_files": {
-        "exclude": [],
+  "lang_files": {
+    "exclude": [],
 
-        "include": [
-            "/admin/" // include all files inside folder lang/en/admin/*
-		],
+    "include": [
+      "/admin/" // include all files inside folder lang/en/admin/*
+    ],
 
-        "exclude_keys": []
-    },
+    "exclude_keys": []
+  },
 
-    "view_files": {
-        "exclude": [],
+  "view_files": {
+    "exclude": [],
 
-        "include": [
-            "/admin/" // include all files (parse phrases) inside folder views/admin/*
-		]
-    },
+    "include": [
+      "/admin/" // include all files (parse phrases) inside folder views/admin/*
+    ]
+  },
 
-    "exclude_phrases": []
+  "exclude_phrases": []
 }
 ```
 
 
-**Step #3: Generate a single file using schema**
+**Step #3: Export untranslated phrases to a single file for a translator**
 
 ```bash
 php artisan interpreter:export ru
 ```
 
+*This command also display all unwrapped (with missing @lang) phrases.*
 
-**Step #4: Save filled single file to the project's structure**
+
+**Step #4: Import the completed single file to the project's structure**
 
 ```bash
 php artisan interpreter:import ru
