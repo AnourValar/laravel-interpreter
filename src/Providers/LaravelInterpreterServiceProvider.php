@@ -13,7 +13,8 @@ class LaravelInterpreterServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
+        // config
+        $this->mergeConfigFrom(__DIR__.'/../resources/config/interpreter.php', 'interpreter');
     }
 
     /**
@@ -24,7 +25,6 @@ class LaravelInterpreterServiceProvider extends ServiceProvider
     public function boot()
     {
         // config
-        $this->mergeConfigFrom(__DIR__.'/../resources/config/interpreter.php', 'interpreter');
         $this->publishes([ __DIR__.'/../resources/config/interpreter.php' => config_path('interpreter.php')], 'config');
 
         // commands
