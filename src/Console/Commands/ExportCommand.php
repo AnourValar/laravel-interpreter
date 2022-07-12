@@ -60,6 +60,10 @@ class ExportCommand extends Command
             // Handle
             $data = [];
             foreach ($sourceData as $key => $value) {
+                if ($schema['include_pattern'] && !preg_match($schema['include_pattern'], $value)) {
+                    continue;
+                }
+
                 if (in_array($value, $schema['exclude_phrases'], true)) {
                     continue;
                 }

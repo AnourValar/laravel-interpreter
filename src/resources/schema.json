@@ -21,5 +21,6 @@
         "include": []
     },
 
-    "exclude_phrases": []
+    "exclude_phrases": [],
+    "include_pattern": null
 }
