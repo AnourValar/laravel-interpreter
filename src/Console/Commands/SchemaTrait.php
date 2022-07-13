@@ -50,4 +50,22 @@ trait SchemaTrait
 
         return $adapter;
     }
+
+    /**
+     * @param array $schema
+     * @param string $value
+     * @return bool
+     */
+    protected function isExcluded(array $schema, string $value): bool
+    {
+        if ($schema['include_pattern'] && !preg_match($schema['include_pattern'], $value)) {
+            return true;
+        }
+
+        if (in_array($value, $schema['exclude_phrases'], true)) {
+            return true;
+        }
+
+        return false;
+    }
 }

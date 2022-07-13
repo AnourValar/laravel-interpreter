@@ -62,7 +62,7 @@ class ImportCommand extends Command
                     $targetData[$path] = [];
                 }
 
-                $data = $this->replace($data, $translate, $schema['lang_files']['exclude_keys']);
+                $data = $this->replace($data, $translate, $schema);
                 $data = $this->clean($data);
                 if (! $this->option('re-translate')) {
                     $data = array_replace_recursive($data, $targetData[$path]);
@@ -114,13 +114,13 @@ class ImportCommand extends Command
     /**
      * @param array $source
      * @param array $data
-     * @param array $excludeKeys
+     * @param array $schema
      * @return array
      */
-    protected function replace(array $source, array $data, array $excludeKeys): array
+    protected function replace(array $source, array $data, array $schema): array
     {
         foreach ($source as $key => $value) {
-            if (in_array($key, $excludeKeys, true)) {
+            if (in_array($key, $schema['lang_files']['exclude_keys'], true)) {
                 unset($source[$key]);
                 continue;
             }
@@ -150,9 +150,11 @@ class ImportCommand extends Command
                     }
                 }
 
-                unset($source[$key]);
+                if (! ($schema['copy_exlcuded'] && $this->isExcluded($schema, $source[$key]))) {
+                    unset($source[$key]);
+                }
             } else {
-                $source[$key] = $this->replace($value, $data, $excludeKeys);
+                $source[$key] = $this->replace($value, $data, $schema);
             }
         }
 

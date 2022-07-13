@@ -22,5 +22,6 @@
     },
 
     "exclude_phrases": [],
-    "include_pattern": null
+    "include_pattern": null,
+    "copy_exlcuded": true
 }
