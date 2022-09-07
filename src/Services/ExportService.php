@@ -142,7 +142,9 @@ class ExportService
                     $result[$relativePath] = $this->load($fullpath);
 
                     if (! $ignoreFilters) {
-                        $result[$relativePath] = $this->excludeKeys($result[$relativePath], $schema['lang_files']['exclude_keys']);
+                        $keyMap = str_replace('/', '.', preg_replace('#\.php$#', '', $relativePath));
+
+                        $result[$relativePath] = $this->excludeKeys($result[$relativePath], $schema['lang_files']['exclude_keys'], $keyMap);
                     }
                 }
             }
@@ -154,19 +156,25 @@ class ExportService
     /**
      * @param array $data
      * @param array $excludeKeys
+     * @param string $keyMap
      * @return array
      */
-    protected function excludeKeys(array $data, array $excludeKeys): array
+    protected function excludeKeys(array $data, array $excludeKeys, string $keyMap): array
     {
         $result = [];
 
         foreach ($data as $key => $value) {
-            if (in_array($key, $excludeKeys, true)) {
-                continue;
+            $currKeyMap = sprintf('%s.%s', $keyMap, $key);
+
+            $currKeyMapArray = explode('.', $currKeyMap);
+            while (! is_null(array_shift($currKeyMapArray))) {
+                if (in_array(implode('.', $currKeyMapArray), $excludeKeys, true)) {
+                    continue 2;
+                }
             }
 
             if (is_array($value)) {
-                $result[$key] = $this->excludeKeys($value, $excludeKeys);
+                $result[$key] = $this->excludeKeys($value, $excludeKeys, $currKeyMap);
             } else {
                 $result[$key] = $value;
             }

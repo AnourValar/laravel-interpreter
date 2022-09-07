@@ -16,7 +16,7 @@ trait SchemaTrait
         $path = \App::langPath() . '/' . $schema . '_schema.json';
 
         if (! file_exists($path)) {
-            throw new InputException('Schema file "'.$path.'" not exists.');
+            throw new InputException('Schema file "'.$path.'" does not exist.');
         }
 
         $schema = json_decode(file_get_contents($path), true);

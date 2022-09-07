@@ -36,7 +36,7 @@ class WrapCommand extends Command
             // Input data
             $templatePath = base_path($this->argument('template'));
             if (! is_file($templatePath)) {
-                throw new InputException('File "'.$templatePath.'" not exists.');
+                throw new InputException('File "'.$templatePath.'" does not exist.');
             }
 
             // Handle

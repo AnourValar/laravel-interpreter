@@ -62,7 +62,8 @@ class ImportCommand extends Command
                     $targetData[$path] = [];
                 }
 
-                $data = $this->replace($data, $translate, $schema);
+                $keyMap = str_replace('/', '.', preg_replace('#\.php$#', '', $path));
+                $data = $this->replace($data, $translate, $schema, $keyMap);
                 $data = $this->clean($data);
                 if (! $this->option('re-translate')) {
                     $data = array_replace_recursive($data, $targetData[$path]);
@@ -115,14 +116,20 @@ class ImportCommand extends Command
      * @param array $source
      * @param array $data
      * @param array $schema
+     * @param string $keyMap
      * @return array
      */
-    protected function replace(array $source, array $data, array $schema): array
+    protected function replace(array $source, array $data, array $schema, string $keyMap): array
     {
         foreach ($source as $key => $value) {
-            if (in_array($key, $schema['lang_files']['exclude_keys'], true)) {
-                unset($source[$key]);
-                continue;
+            $currKeyMap = sprintf('%s.%s', $keyMap, $key);
+
+            $currKeyMapArray = explode('.', $currKeyMap);
+            while (! is_null(array_shift($currKeyMapArray))) {
+                if (in_array(implode('.', $currKeyMapArray), $schema['lang_files']['exclude_keys'], true)) {
+                    unset($source[$key]);
+                    continue 2;
+                }
             }
 
             if (is_scalar($value)) {
@@ -154,7 +161,7 @@ class ImportCommand extends Command
                     unset($source[$key]);
                 }
             } else {
-                $source[$key] = $this->replace($value, $data, $schema);
+                $source[$key] = $this->replace($value, $data, $schema, $currKeyMap);
             }
         }
 
