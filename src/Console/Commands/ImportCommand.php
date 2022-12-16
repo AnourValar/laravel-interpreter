@@ -40,6 +40,7 @@ class ImportCommand extends Command
 
             // Get current state
             $sourceData = $exportService->get($schema, true, false);
+            $fullSourceData = $exportService->get($schema, true, true);
             $targetData = $exportService->get($schema, false, true);
 
             // Prepare data for import
@@ -70,7 +71,7 @@ class ImportCommand extends Command
                 }
 
                 if ($data) {
-                    $data = $this->sort($data, $sourceData[$path], ($path == '/<locale>.json'));
+                    $data = $this->sort($data, $fullSourceData[$path], ($path == '/<locale>.json'));
 
                     if ($data != $targetData[$path]) {
                         $path = str_replace('<locale>', $schema['target_locale'], $path);
