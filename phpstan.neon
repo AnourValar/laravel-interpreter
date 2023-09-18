@@ -1,0 +1,24 @@
+parameters:
+
+    paths:
+        - src
+
+    # The level 9 is the highest level
+    level: 5
+
+    ignoreErrors:
+        - '#Parameter \#2 \$permissions of function mkdir expects int\, string given\.#'
+        - '#Call to static method#'
+
+    excludePaths:
+
+    checkFunctionNameCase: true
+    checkInternalClassCaseSensitivity: true
+    checkAlwaysTrueInstanceof: true
+    reportMaybesInMethodSignatures: true
+    reportStaticMethodSignatures: true
+    checkUninitializedProperties: true
+    checkDynamicProperties: true
+    reportAlwaysTrueInLastCondition: true
+    reportWrongPhpDocTypeInVarTag: true
+    checkMissingCallableSignature: true

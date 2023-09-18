@@ -51,7 +51,7 @@ class ExportCommand extends Command
         try {
             // Input data
             $schema = $this->getSchema($this->argument('schema'));
-            $filename = $this->getFileName($schema);
+            $filename = $this->getFilename($schema);
 
             // Get current state
             $sourceData = $this->exportService->getFlat($schema, true);
@@ -139,8 +139,7 @@ class ExportCommand extends Command
      */
     protected function sort(array &$data): void
     {
-        uksort($data, function ($a, $b)
-        {
+        uksort($data, function ($a, $b) {
             if (mb_strlen($a) < mb_strlen($b)) {
                 return 1;
             }

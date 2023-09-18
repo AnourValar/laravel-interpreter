@@ -201,8 +201,7 @@ class ImportCommand extends Command
         if ($json) {
             uksort(
                 $data,
-                function ($a, $b)
-                {
+                function ($a, $b) {
                     if (mb_strlen($a) > mb_strlen($b)) {
                         return -1;
                     }
@@ -220,8 +219,7 @@ class ImportCommand extends Command
 
         uksort(
             $data,
-            function ($a, $b) use ($reference)
-            {
+            function ($a, $b) use ($reference) {
                 foreach (array_keys($reference) as $key) {
                     if ($key == $a) {
                         return -1;

@@ -43,9 +43,9 @@ class WrapCommand extends Command
             $template = $this->wrap(file_get_contents($templatePath), $this->argument('wrap'), $counter);
 
             // Result
-           if (! $counter) {
+            if (! $counter) {
                 $this->info('Nothing to wrap.');
-            } elseif ( file_put_contents($templatePath, $template) !== false) {
+            } elseif (file_put_contents($templatePath, $template) !== false) {
                 $this->info("Template wrapped. Patterns: $counter");
             } else {
                 $this->error('Something went wrong.');
@@ -79,8 +79,7 @@ class WrapCommand extends Command
         foreach ($regexps as $regexp) {
             $template = preg_replace_callback(
                 $regexp,
-                function ($pattern) use (&$ignorePatterns)
-                {
+                function ($pattern) use (&$ignorePatterns) {
                     $key = "<<!@#-- ".sha1($pattern[0])." --#@!>>";
                     $ignorePatterns[$key] = $pattern[0];
 
@@ -96,8 +95,7 @@ class WrapCommand extends Command
         // Patterns for replace
         $template = preg_replace_callback(
             '#([^\<\>\n]+)#',
-            function ($pattern) use ($wrap, &$counter)
-            {
+            function ($pattern) use ($wrap, &$counter) {
                 foreach (config('interpreter.regexp_miss') as $regexp) {
                     if (preg_match($regexp, $pattern[0])) {
                         $counter++;

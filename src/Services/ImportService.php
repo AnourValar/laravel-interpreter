@@ -44,7 +44,7 @@ class ImportService
                 $result .= "\n";
             }
 
-            $key = "'".addCslashes($key, "'")."'";
+            $key = "'".addcslashes($key, "'")."'";
 
             if (is_array($value)) {
                 $result .= str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "$key => [";
@@ -52,7 +52,7 @@ class ImportService
                 $sub = $this->exportArray($value, $indentSize + 4);
 
                 if ($sub) {
-                   if (stripos($sub, "\n")) {
+                    if (stripos($sub, "\n")) {
                         $result .= "\n" . $sub . "\n" . str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "],";
                     } else {
                         $result .= trim(mb_substr($sub, 0, -1))."],";
@@ -64,7 +64,7 @@ class ImportService
                 if (is_null($value)) {
                     $value = 'null';
                 } elseif (is_string($value)) {
-                    $value = "'".addCslashes($value, "'")."'";
+                    $value = "'".addcslashes($value, "'")."'";
                 }
 
                 $result .= str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "$key => $value,";

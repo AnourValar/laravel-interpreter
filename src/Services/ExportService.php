@@ -53,7 +53,7 @@ class ExportService
      */
     public function getFlat(array $schema, bool $source): array
     {
-        return $this->flatten( $this->get($schema, $source, !$source) );
+        return $this->flatten($this->get($schema, $source, !$source));
     }
 
     /**
