@@ -51,8 +51,7 @@ php artisan interpreter:schema ru
   },
 
   "exclude_phrases": [],
-  "include_pattern": null, // "white" filter (regexp)
-  "copy_exlcuded": true
+  "include_pattern": null // "white" filter (regexp)
 }
 ```
 

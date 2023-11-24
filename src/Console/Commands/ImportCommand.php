@@ -65,6 +65,7 @@ class ImportCommand extends Command
 
                 $keyMap = str_replace('/', '.', preg_replace('#\.php$#', '', $path));
                 $data = $this->replace($data, $translate, $schema, $keyMap);
+                $data = $this->excludeClean($data, $schema);
                 $data = $this->clean($data);
                 if (! $this->option('re-translate')) {
                     $data = array_replace_recursive($data, $targetData[$path]);
@@ -158,7 +159,7 @@ class ImportCommand extends Command
                     }
                 }
 
-                if (! ($schema['copy_exlcuded'] && $this->isExcluded($schema, $source[$key]))) {
+                if (! $this->isExcluded($schema, $source[$key])) {
                     unset($source[$key]);
                 }
             } else {
@@ -185,6 +186,27 @@ class ImportCommand extends Command
             if (! count($data[$key])) {
                 unset($data[$key]);
             }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    protected function excludeClean(array $data, array $schema): array
+    {
+        foreach ($data as $key => $value) {
+            $values = $this->getValues($value);
+
+            foreach ($values as $value) {
+                if (! is_string($value) || ! $this->isExcluded($schema, $value)) {
+                    continue 2;
+                }
+            }
+
+            unset($data[$key]);
         }
 
         return $data;
@@ -241,5 +263,24 @@ class ImportCommand extends Command
         }
 
         return $data;
+    }
+
+    /**
+     * @param mixed $data
+     * @return mixed
+     */
+    private function getValues($data)
+    {
+        $values = [];
+
+        if (is_array($data)) {
+            foreach ($data as $item) {
+                $values = array_merge($values, $this->getValues($item));
+            }
+        } else {
+            $values[] = $data;
+        }
+
+        return $values;
     }
 }
