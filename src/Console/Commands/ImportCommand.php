@@ -159,7 +159,7 @@ class ImportCommand extends Command
                     }
                 }
 
-                if (! $this->isExcluded($schema, $source[$key])) {
+                if (! $this->isExcluded($schema, $source[$key])) { // remove not translated phrases
                     unset($source[$key]);
                 }
             } else {
