@@ -27,6 +27,11 @@ class SchemaCommand extends Command
      */
     public function handle()
     {
+        if (! is_dir(\App::langPath())) {
+            $this->error('Lang directory is not published.');
+            return COMMAND::FAILURE;
+        }
+
         $targetLocale = $this->argument('targetLocale');
         $path = \App::langPath() . '/' . $targetLocale . '_schema.json';
 
