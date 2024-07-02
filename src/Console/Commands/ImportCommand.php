@@ -78,7 +78,7 @@ class ImportCommand extends Command
                         $path = str_replace('<locale>', $schema['target_locale'], $path);
 
                         if (! $importService->save(\App::langPath() . $path, $data, $this->argument('chmod'))) {
-                            throw new InputException('Cannot save to file "'.$path.'".');
+                            throw new InputException('Cannot save to the file "'.$path.'".');
                         }
                         $imported = true;
                     }

@@ -45,7 +45,7 @@ class SchemaCommand extends Command
 
         } elseif (! file_put_contents($path, $schema)) {
 
-            $this->error('Cannot save schema to file "'.$path.'".');
+            $this->error('Cannot save schema to the file "'.$path.'".');
 
         } else {
 

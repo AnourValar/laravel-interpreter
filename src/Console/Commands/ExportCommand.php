@@ -109,7 +109,7 @@ class ExportCommand extends Command
             } elseif (file_put_contents($filename, $this->getAdapter($schema)->export($data))) {
                 $this->info('Translate successfully created. File: "'.$filename.'".');
             } else {
-                $this->error('Cannot save to file "'.$filename.'".');
+                $this->error('Cannot save to the file "'.$filename.'".');
             }
         } catch (InputException $e) {
             $this->error($e->getMessage());
