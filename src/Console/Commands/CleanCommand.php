@@ -2,7 +2,6 @@
 
 namespace AnourValar\LaravelInterpreter\Console\Commands;
 
-use AnourValar\LaravelInterpreter\Exceptions\InputException;
 use Illuminate\Console\Command;
 use AnourValar\LaravelInterpreter\Services\ExportService;
 use AnourValar\LaravelInterpreter\Services\ImportService;
@@ -60,7 +59,7 @@ class CleanCommand extends Command
                 $path = str_replace('<locale>', $schema['target_locale'], $path);
                 if ($newData) {
                     if (! $importService->save(\App::langPath() . $path, $newData)) {
-                        throw new InputException('Cannot save to the file "'.$path.'".');
+                        throw new \InvalidArgumentException('Cannot save to the file "'.$path.'".');
                     }
                 } else {
                     unlink(\App::langPath() . $path);
@@ -73,8 +72,9 @@ class CleanCommand extends Command
             } else {
                 $this->warn('Nothing to clean.');
             }
-        } catch (InputException $e) {
+        } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
+            return Command::FAILURE;
         }
 
         return Command::SUCCESS;

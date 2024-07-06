@@ -2,7 +2,6 @@
 
 namespace AnourValar\LaravelInterpreter\Console\Commands;
 
-use AnourValar\LaravelInterpreter\Exceptions\InputException;
 use Illuminate\Console\Command;
 use AnourValar\LaravelInterpreter\Services\ExportService;
 use AnourValar\LaravelInterpreter\Services\ImportService;
@@ -78,7 +77,7 @@ class ImportCommand extends Command
                         $path = str_replace('<locale>', $schema['target_locale'], $path);
 
                         if (! $importService->save(\App::langPath() . $path, $data, $this->argument('chmod'))) {
-                            throw new InputException('Cannot save to the file "'.$path.'".');
+                            throw new \InvalidArgumentException('Cannot save to the file "'.$path.'".');
                         }
                         $imported = true;
                     }
@@ -91,8 +90,9 @@ class ImportCommand extends Command
             } else {
                 $this->warn('Nothing to import.');
             }
-        } catch (InputException $e) {
+        } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
+            return Command::FAILURE;
         }
 
         return Command::SUCCESS;

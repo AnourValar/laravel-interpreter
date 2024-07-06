@@ -2,7 +2,6 @@
 
 namespace AnourValar\LaravelInterpreter\Console\Commands;
 
-use AnourValar\LaravelInterpreter\Exceptions\InputException;
 use Illuminate\Console\Command;
 
 class ExportCommand extends Command
@@ -111,15 +110,16 @@ class ExportCommand extends Command
             } else {
                 $this->error('Cannot save to the file "'.$filename.'".');
             }
-        } catch (InputException $e) {
+        } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
+            return Command::FAILURE;
         }
 
         return Command::SUCCESS;
     }
 
     /**
-     * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
+     * @throws \InvalidArgumentException
      * @return string
      */
     protected function getFilename(array $schema): string
@@ -127,7 +127,7 @@ class ExportCommand extends Command
         $filename = \App::langPath() . '/' . $schema['filename'];
 
         if (!$this->option('force') && file_exists($filename)) {
-            throw new InputException('Translate already exists. File: "'.$filename.'".');
+            throw new \InvalidArgumentException('Translate already exists. File: "'.$filename.'".');
         }
 
         return $filename;

@@ -31,11 +31,14 @@ class ImportService
     }
 
     /**
+     * Inline code for the array
+     *
      * @param array $array
      * @param int $indentSize
+     * @param bool $forceNewLine
      * @return string
      */
-    private function exportArray(array $array, int $indentSize): string
+    private function exportArray(array $array, int $indentSize = 4, bool $forceNewLine = false): string
     {
         $result = '';
 
@@ -49,10 +52,10 @@ class ImportService
             if (is_array($value)) {
                 $result .= str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "$key => [";
 
-                $sub = $this->exportArray($value, $indentSize + 4);
+                $sub = $this->exportArray($value, $indentSize + 4, $forceNewLine);
 
                 if ($sub) {
-                    if (stripos($sub, "\n")) {
+                    if (stripos($sub, "\n") || $forceNewLine) {
                         $result .= "\n" . $sub . "\n" . str_pad('', $indentSize, ' ', STR_PAD_LEFT) . "],";
                     } else {
                         $result .= trim(mb_substr($sub, 0, -1))."],";

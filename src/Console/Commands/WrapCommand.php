@@ -2,7 +2,6 @@
 
 namespace AnourValar\LaravelInterpreter\Console\Commands;
 
-use AnourValar\LaravelInterpreter\Exceptions\InputException;
 use Illuminate\Console\Command;
 use AnourValar\LaravelInterpreter\Services\ExportService;
 use AnourValar\LaravelInterpreter\Services\ImportService;
@@ -36,7 +35,7 @@ class WrapCommand extends Command
             // Input data
             $templatePath = base_path($this->argument('template'));
             if (! is_file($templatePath)) {
-                throw new InputException('File "'.$templatePath.'" does not exist.');
+                throw new \InvalidArgumentException('File "'.$templatePath.'" does not exist.');
             }
 
             // Handle
@@ -50,8 +49,9 @@ class WrapCommand extends Command
             } else {
                 $this->error('Something went wrong.');
             }
-        } catch (InputException $e) {
+        } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
+            return Command::FAILURE;
         }
 
         return Command::SUCCESS;

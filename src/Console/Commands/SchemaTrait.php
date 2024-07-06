@@ -2,13 +2,11 @@
 
 namespace AnourValar\LaravelInterpreter\Console\Commands;
 
-use AnourValar\LaravelInterpreter\Exceptions\InputException;
-
 trait SchemaTrait
 {
     /**
      * @param string $schema
-     * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
+     * @throws \InvalidArgumentException
      * @return array
      */
     protected function getSchema(?string $schema): array
@@ -16,20 +14,20 @@ trait SchemaTrait
         $path = \App::langPath() . '/' . $schema . '_schema.json';
 
         if (! file_exists($path)) {
-            throw new InputException('Schema file "'.$path.'" does not exist.');
+            throw new \InvalidArgumentException('Schema file "'.$path.'" does not exist.');
         }
 
         $schema = json_decode(file_get_contents($path), true);
 
         if (! is_array($schema)) {
-            throw new InputException('Incorrect schema structure.');
+            throw new \InvalidArgumentException('Incorrect schema structure.');
         }
         if ($schema != array_replace(json_decode(file_get_contents(__DIR__.'/../../resources/schema.json'), true), $schema)) {
-            throw new InputException('Incorrect schema structure.');
+            throw new \InvalidArgumentException('Incorrect schema structure.');
         }
 
         if ($schema['target_locale'] == $schema['source_locale']) {
-            throw new InputException('Target locale should be different than "app.locale".');
+            throw new \InvalidArgumentException('Target locale should be different than "app.locale".');
         }
 
         return $schema;
@@ -37,7 +35,7 @@ trait SchemaTrait
 
     /**
      * @param array $schema
-     * @throws \AnourValar\LaravelInterpreter\Exceptions\InputException
+     * @throws \InvalidArgumentException
      * @return \AnourValar\LaravelInterpreter\Adapters\AdapterInterface
      */
     protected function getAdapter(array $schema): \AnourValar\LaravelInterpreter\Adapters\AdapterInterface
@@ -45,7 +43,7 @@ trait SchemaTrait
         $adapter = \App::make($schema['adapter']);
 
         if (! $adapter instanceof \AnourValar\LaravelInterpreter\Adapters\AdapterInterface) {
-            throw new InputException('Adapter must implements AdapterInterface.');
+            throw new \InvalidArgumentException('Adapter must implements AdapterInterface.');
         }
 
         return $adapter;
