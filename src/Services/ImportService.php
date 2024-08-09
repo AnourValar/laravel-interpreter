@@ -66,6 +66,10 @@ class ImportService
             } else {
                 if (is_null($value)) {
                     $value = 'null';
+                } elseif ($value === true) {
+                    $value = 'true';
+                } elseif ($value === false) {
+                    $value = 'false';
                 } elseif (is_string($value)) {
                     $value = "'".addcslashes($value, "'")."'";
                 }
