@@ -60,10 +60,10 @@ class WrapCommand extends Command
     /**
      * @param string $template
      * @param string $wrap
-     * @param int $counter
+     * @param int|null $counter
      * @return string
      */
-    protected function wrap(string $template, string $wrap, int &$counter = null): string
+    protected function wrap(string $template, string $wrap, ?int &$counter = null): string
     {
         // Patterns for ignore
         $ignorePatterns = [];
