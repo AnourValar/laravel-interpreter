@@ -25,7 +25,7 @@ class LaravelInterpreterServiceProvider extends ServiceProvider
     public function boot()
     {
         // config
-        $this->publishes([ __DIR__.'/../resources/config/interpreter.php' => config_path('interpreter.php')], 'config');
+        $this->publishes([__DIR__.'/../resources/config/interpreter.php' => config_path('interpreter.php')], 'config');
 
         // commands
         if ($this->app->runningInConsole()) {
