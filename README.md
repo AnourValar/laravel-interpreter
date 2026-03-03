@@ -50,7 +50,7 @@ php artisan interpreter:schema ru
     ]
   },
 
-  "exclude_phrases": [],
+  "exclude_phrases": ["ID", "Email", "E-Mail"],
   "include_pattern": null // "white" filter (regexp)
 }
 ```
