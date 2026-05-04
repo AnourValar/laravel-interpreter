@@ -20,7 +20,7 @@ class ImportService
             $data = file_get_contents(__DIR__.'/../resources/template.tpl');
             $data = str_replace('%PASTE HERE%', $array, $data);
         } else {
-            $data = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n";
+            $data = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION) . "\n";
         }
 
         if (! is_dir(dirname($path))) {
