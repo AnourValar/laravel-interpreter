@@ -11,10 +11,16 @@
     "require-dev": {
         "phpstan/phpstan": "^2.0",
         "friendsofphp/php-cs-fixer": "^3.26",
-        "squizlabs/php_codesniffer": "^3.7"
+        "squizlabs/php_codesniffer": "^3.7",
+        "orchestra/testbench-core": "^11.0",
+        "phpunit/phpunit": "^11.5|^12.0",
+        "mockery/mockery": "^1.6"
     },
     "autoload": {
         "psr-4": {"AnourValar\\LaravelInterpreter\\": "src/"}
+    },
+    "autoload-dev": {
+        "psr-4": {"AnourValar\\LaravelInterpreter\\Tests\\": "tests/"}
     },
     "extra": {
         "laravel": {
