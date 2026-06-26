@@ -36,7 +36,7 @@ php artisan interpreter:schema ru
     "exclude": [],
 
     "include": [
-      "/admin/" // include all files inside folder lang/en/admin/*
+      "/admin/" // include all files inside directory lang/en/admin/*
     ],
 
     "exclude_keys": []
@@ -46,8 +46,14 @@ php artisan interpreter:schema ru
     "exclude": [],
 
     "include": [
-      "/admin/" // include all files (parse phrases) inside folder views/admin/*
+      "/admin/" // include all files (parse phrases) inside directory views/admin/*
     ]
+  },
+
+  "vendor_view_files": {
+    "exclude": [],
+
+    "include": ["/anourvalar/laravel-form/"] // include all files inside directory vendor/*
   },
 
   "exclude_phrases": ["ID", "Email", "E-Mail"],

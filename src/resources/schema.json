@@ -21,6 +21,12 @@
         "include": []
     },
 
+    "vendor_view_files": {
+        "exclude": [],
+
+        "include": []
+    },
+
     "exclude_phrases": ["ID", "Email", "E-Mail"],
     "include_pattern": null
 }

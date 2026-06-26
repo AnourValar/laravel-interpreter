@@ -26,6 +26,13 @@ abstract class AbstractSuite extends \Orchestra\Testbench\TestCase
     protected string $viewPath;
 
     /**
+     * Temporary vendor directory (base_path('vendor')).
+     *
+     * @var string
+     */
+    protected string $vendorPath;
+
+    /**
      * Init
      *
      * @return void
@@ -35,9 +42,11 @@ abstract class AbstractSuite extends \Orchestra\Testbench\TestCase
         $this->basePath = sys_get_temp_dir() . '/laravel_interpreter_' . uniqid('', true);
         $this->langPath = $this->basePath . '/lang';
         $this->viewPath = $this->basePath . '/views';
+        $this->vendorPath = $this->basePath . '/vendor';
 
         $this->makeDir($this->langPath);
         $this->makeDir($this->viewPath);
+        $this->makeDir($this->vendorPath);
 
         parent::setUp();
     }
@@ -64,6 +73,7 @@ abstract class AbstractSuite extends \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
+        $app->setBasePath($this->basePath);
         $app->useLangPath($this->langPath);
 
         $app['config']->set('app.locale', 'en');
@@ -129,6 +139,23 @@ abstract class AbstractSuite extends \Orchestra\Testbench\TestCase
     protected function putView(string $relativePath, string $contents): string
     {
         $path = $this->viewPath . '/' . ltrim($relativePath, '/');
+        $this->makeDir(dirname($path));
+
+        file_put_contents($path, $contents);
+
+        return $path;
+    }
+
+    /**
+     * Write a view file into a fake vendor package (base_path('vendor')).
+     *
+     * @param string $relativePath
+     * @param string $contents
+     * @return string
+     */
+    protected function putVendorView(string $relativePath, string $contents): string
+    {
+        $path = $this->vendorPath . '/' . ltrim($relativePath, '/');
         $this->makeDir(dirname($path));
 
         file_put_contents($path, $contents);

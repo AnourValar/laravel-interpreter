@@ -12,7 +12,8 @@ trait WalkTrait
     {
         $phrases = [];
 
-        foreach ($this->getViews((array) config('view.paths'), $schema) as $view) {
+        $views = $this->getViews((array) config('view.paths'), $schema) + $this->getVendorViews($schema);
+        foreach ($views as $view) {
             $phrases = array_merge($phrases, $this->parsePhrases($view));
         }
 
@@ -61,6 +62,16 @@ trait WalkTrait
         }
 
         return $result;
+    }
+
+    /**
+     * @param array $schema
+     * @return array
+     */
+    protected function getVendorViews(array $schema): array
+    {
+        $schema['view_files'] = $schema['vendor_view_files'];
+        return $this->getViews([base_path('vendor')], $schema);
     }
 
     /**

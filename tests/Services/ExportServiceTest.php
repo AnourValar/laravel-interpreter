@@ -153,6 +153,59 @@ class ExportServiceTest extends AbstractSuite
         $this->assertSame(['greeting' => 'Hi from vendor'], $data['/vendor/somepackage/<locale>/messages.php']);
     }
 
+    public function test_it_collects_phrases_from_vendor_views(): void
+    {
+        $this->putVendorView('anourvalar/laravel-form/src/form.blade.php', "<button>@lang('Submit form')</button>");
+
+        $schema = $this->fullSchema([
+            'vendor_view_files' => ['exclude' => [], 'include' => ['/anourvalar/laravel-form/src/']],
+        ]);
+
+        $data = $this->service->get($schema, true, false);
+
+        $this->assertArrayHasKey('Submit form', $data['/<locale>.json']);
+    }
+
+    public function test_vendor_views_are_ignored_when_include_is_empty(): void
+    {
+        $this->putVendorView('anourvalar/laravel-form/src/form.blade.php', "<button>@lang('Submit form')</button>");
+
+        // Default schema keeps vendor_view_files include empty.
+        $data = $this->service->get($this->fullSchema(), true, false);
+
+        $this->assertArrayNotHasKey('Submit form', $data['/<locale>.json'] ?? []);
+    }
+
+    public function test_vendor_views_outside_the_include_filter_are_skipped(): void
+    {
+        $this->putVendorView('anourvalar/laravel-form/src/form.blade.php', "@lang('Wanted phrase')");
+        $this->putVendorView('other/some-package/src/page.blade.php', "@lang('Unwanted phrase')");
+
+        $schema = $this->fullSchema([
+            'vendor_view_files' => ['exclude' => [], 'include' => ['/anourvalar/laravel-form/src/']],
+        ]);
+
+        $data = $this->service->get($schema, true, false);
+
+        $this->assertArrayHasKey('Wanted phrase', $data['/<locale>.json']);
+        $this->assertArrayNotHasKey('Unwanted phrase', $data['/<locale>.json']);
+    }
+
+    public function test_vendor_views_respect_the_exclude_filter(): void
+    {
+        $this->putVendorView('anourvalar/laravel-form/src/form.blade.php', "@lang('Form phrase')");
+        $this->putVendorView('anourvalar/laravel-form/src/tests/stub.blade.php', "@lang('Stub phrase')");
+
+        $schema = $this->fullSchema([
+            'vendor_view_files' => ['exclude' => ['/tests/'], 'include' => ['/anourvalar/laravel-form/src/']],
+        ]);
+
+        $data = $this->service->get($schema, true, false);
+
+        $this->assertArrayHasKey('Form phrase', $data['/<locale>.json']);
+        $this->assertArrayNotHasKey('Stub phrase', $data['/<locale>.json']);
+    }
+
     public function test_get_missed_returns_untranslated_cyrillic_phrases(): void
     {
         $this->putView('home.blade.php', "<h1>Привет мир</h1> @lang('Already wrapped')");
